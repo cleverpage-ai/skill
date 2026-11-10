@@ -7,6 +7,10 @@
   },
   "homepage": "https://www.cleverpage.ai",
   "repository": "https://github.com/cleverpage-ai/skill",
+  "documentationUrl": "https://app.cleverpage.ai/api/v1/manual",
+  "supportUrl": "https://github.com/cleverpage-ai/skill/issues",
+  "privacyPolicyUrl": "https://www.cleverpage.ai/en/privacy",
+  "termsOfServiceUrl": "https://www.cleverpage.ai/agb",
   "license": "MIT",
   "keywords": ["website", "cms", "hosting", "editor"]
 }
