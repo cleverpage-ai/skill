@@ -6,7 +6,7 @@ Deine KI baut die Kundenwebsite. Cleverpage hostet sie und gibt deinem Kunden ei
 
 Dieses Repository bringt Claude Code, Cursor, Codex, Gemini CLI und anderen Agenten mit Terminal bei, wie sie mit [Cleverpage](https://www.cleverpage.ai) arbeiten.
 
-<!-- Hier kommt die Bildschirmaufnahme hin: Prompt, Bestätigung im Browser, Baufortschritt live, fertige Seite im Editor -->
+![Claude Code baut mit Cleverpage eine Website: der Prompt, die Bestätigung im Browser, der Bau live, die Kundin ändert im Editor die Öffnungszeiten](assets/cleverpage-skill.gif)
 
 ## Welches Problem das löst
 

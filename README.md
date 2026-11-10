@@ -6,7 +6,7 @@ Your AI builds the client website. Cleverpage hosts it and gives your client an 
 
 This repository teaches Claude Code, Cursor, Codex, Gemini CLI and other agents with a terminal how to work with [Cleverpage](https://www.cleverpage.ai).
 
-<!-- The screen recording goes here: prompt, confirmation in the browser, live build progress, finished page in the editor -->
+![Claude Code builds a website with Cleverpage: the prompt, the confirmation in the browser, the live build, the client changing the opening hours in the editor](assets/cleverpage-skill.gif)
 
 ## The problem this solves
 
