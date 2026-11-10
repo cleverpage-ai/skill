@@ -1,0 +1,18 @@
+{
+  "name": "cleverpage",
+  "description": "Cleverpage for AI agents: build client websites that your client edits without you.",
+  "owner": {
+    "name": "Cleverpage",
+    "url": "https://www.cleverpage.ai"
+  },
+  "plugins": [
+    {
+      "name": "cleverpage",
+      "source": "./plugins/cleverpage",
+      "description": "Build, change or continue a website with Cleverpage. The skill points your agent to the current manual on the server.",
+      "homepage": "https://www.cleverpage.ai",
+      "license": "MIT",
+      "keywords": ["website", "cms", "hosting", "editor"]
+    }
+  ]
+}

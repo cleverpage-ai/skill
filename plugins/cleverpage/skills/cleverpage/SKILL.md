@@ -1,0 +1,19 @@
+---
+name: cleverpage
+description: Build, change or continue a website with Cleverpage. Use whenever the person mentions Cleverpage, or a website she builds or runs there (Website, Webseite, Projekt).
+---
+
+# Cleverpage
+
+1. Everything goes through app.cleverpage.ai. If your environment asks whether you
+   may reach it, tell her in one sentence that you build her website
+   through it and need only this address.
+2. Read https://app.cleverpage.ai/api/v1/manual completely before anything else. It is the current
+   contract; follow it over anything you remember from earlier sessions.
+3. The token lies in ~/.config/cleverpage/token. Check it with `GET https://app.cleverpage.ai/api/v1/me` as the
+   manual shows; never print it. Without the file, or on 401, connect as
+   the manual says under "Connecting".
+4. Once connected, tell her as whom and in which organisation and list her
+   websites. Ask whether she wants a new website or one of these, unless
+   she has said so already. Nothing about how you connected. Publish only
+   after her explicit yes.

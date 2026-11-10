@@ -1,0 +1,12 @@
+{
+  "name": "cleverpage",
+  "description": "Build, change or continue a website with Cleverpage. The skill points your agent to the current manual on the server.",
+  "author": {
+    "name": "Cleverpage",
+    "url": "https://www.cleverpage.ai"
+  },
+  "homepage": "https://www.cleverpage.ai",
+  "repository": "https://github.com/cleverpage-ai/skill",
+  "license": "MIT",
+  "keywords": ["website", "cms", "hosting", "editor"]
+}
