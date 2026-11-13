@@ -120,10 +120,13 @@ yet there is no list to give and nothing to choose from.
 
 Base address: `https://app.cleverpage.ai/api/v1`
 
-Every call carries the token in the header, read from the file in the
-same command, never in the address:
+Every call carries three headers: the token, read from the file in the
+same command and never in the address, your product, and the contract
+this copy describes:
 
-    curl -s -H "Authorization: Bearer $(cat ~/.config/cleverpage/token)" https://app.cleverpage.ai/api/v1/me
+    curl -s -H "Authorization: Bearer $(cat ~/.config/cleverpage/token)" \
+        -H "X-Cleverpage-Agent: <your product>" -H "X-Cleverpage-Manual: 1.20.9" \
+        https://app.cleverpage.ai/api/v1/me
 
 `/me` answers who she is, her organisations and what this token is: its
 `id`, `name`, `scopes`, `valid_until` and a `hint`. The hint is the
