@@ -1,7 +1,7 @@
 # Cleverpage API — manual for agents
 
 This copy came with the Cleverpage plugin and describes contract
-1.20.8 of 2026-11-13. The building guide lies beside it:
+1.20.9 of 2026-11-13. The building guide lies beside it:
 `guide-draft.md` and `guide-component.md`.
 
 Cleverpage runs websites built from typed components. You build and
@@ -57,7 +57,7 @@ means you are connected.
 1. Start the request. Its answer goes into a file, not onto the screen:
    the `device_code` in it is what fetches the token.
 
-       mkdir -p ~/.config/cleverpage && umask 077 && C=~/.config/cleverpage/connect.json
+       umask 077 && mkdir -p ~/.config/cleverpage && C=~/.config/cleverpage/connect.json
        curl -s -X POST https://app.cleverpage.ai/api/v1/connect -H "Content-Type: application/json" \
            -H "X-Cleverpage-Agent: <your product>" -d "{\"machine\": \"$(hostname)\"}" -o "$C"
        grep -oE '"(user_code|verification_uri_complete)": *"[^"]*"' "$C"
@@ -77,7 +77,9 @@ means you are connected.
        done
 
    `access_denied` means she declined, `expired_token` that ten minutes
-   passed: ask her, then start again.
+   passed: ask her, then start again. The loop waits up to ten minutes:
+   run it with a timeout that long or in the background, and if your
+   shell cut it off, run the same block again.
 
 Never print the token, never read the file into the conversation, never
 write it into a project or a repository. When a call answers 401 with
@@ -129,9 +131,6 @@ token's first characters, enough to tell two tokens apart in her
 account and useless for a call. It is not the token, and reading it
 breaks none of the rules above.
 
-A token in the environment variable `CLEVERPAGE_TOKEN` (one the person
-made herself under API access) takes the file's place.
-
 Name yourself in every call with `X-Cleverpage-Agent: <your product>`
 (`Claude Code`, `Cursor`, `Codex` …): the person's start page shows
 who is building and follows your progress.
@@ -144,10 +143,10 @@ macOS, ties `path` to `PATH`: after `path=…` or `for path in …` no
 command is found any more (`curl`, `cat`, `python3`: exit 127). Call
 it `page_path` or `address`.
 
-This copy describes contract 1.20.8. Say so in every call, beside
+This copy describes contract 1.20.9. Say so in every call, beside
 your product:
 
-    -H "X-Cleverpage-Agent: <your product>" -H "X-Cleverpage-Manual: 1.20.8"
+    -H "X-Cleverpage-Agent: <your product>" -H "X-Cleverpage-Manual: 1.20.9"
 
 `/me` then answers `manual`: `yours`, `current` and `outdated`. With
 `outdated: true` the plugin has a newer version. Tell her so in one
@@ -162,6 +161,8 @@ working.
 2. `GET https://app.cleverpage.ai/api/v1/projects` — the projects; `POST https://app.cleverpage.ai/api/v1/projects` with
    `{"display_name": "…"}` makes a new one as a draft, with several
    organisations `{"display_name": "…", "organization": "<name>"}`.
+   In every address and in `confirm`, `<project>` is a project's `project`
+   from that list; its `name` is what she calls the website.
 3. Read `guide-draft.md` beside this file when you translate a design,
    `guide-component.md` for single components. Read it before the first
    component; the gate checks exactly these rules.
@@ -330,6 +331,7 @@ calls too; that this manual and the answers are English is no reason.
 | 401 | no token, or the token is unknown, expired or revoked: connect again |
 | 403 | the scope is missing on the token or in the person's role |
 | 404 | the project is not visible to this person, or no such tool |
+| 409 | the page was saved since you read it: read it again and apply your change |
 | 422 | the gate refused: `accepted: false` and the findings; nothing was written |
 | 423 | editing is locked, a payment is overdue |
 | 429 | more than 600 calls in a minute |
@@ -337,7 +339,7 @@ calls too; that this manual and the answers are English is no reason.
 A 422 is a result, not a failure: read each finding, fix what it names,
 submit again. `warnungen` in an accepted answer are worth reading too:
 they name what was taken but will not show. A sensitive tool (publish,
-go live, revert, roll back, maintenance) needs `"confirm": "<project name>"` in
+go live, revert, roll back, maintenance) needs `"confirm": "<project>"` in
 the body; this is the moment to ask the person whether she means it.
 
 Answers of `submit_page`, `submit_layout`, `submit_component`,
@@ -350,7 +352,7 @@ yet: when you create a website or hand it over, name it to the person in
 the chat with the links. A draft project's website stays behind it until
 an owner activates it and connects a domain.
 
-Scopes: `read` (lists, reads, render, guide), `build` (every submit,
+Scopes: `read` (lists, reads, render), `build` (every submit,
 uploads, create project), `operate` (publish, go live, revert, roll back,
 maintenance). A token never carries more than the person's role.
 
@@ -410,7 +412,7 @@ tools also answer GET. The exact schemas stand in
 - **list_collections** · GET or POST · scope read · required: none  
   All collections of the project with IDs and entry counts — read before every submit_collection.
 - **list_types** · GET or POST · scope read · required: none  
-  The project-wide types (concepts/14, 3.3): named field sets such as service, team_member, opening_hours that components reuse with {type: list, of: <name>}. Read before modelling a list or group — reuse beats reinventing.
+  The project-wide types: named field sets such as service, team_member, opening_hours that components reuse with {type: list, of: <name>}. Read before modelling a list or group — reuse beats reinventing.
 - **submit_types** · POST · scope build · required: types  
   Define or replace project-wide types. Each type is {label, description, props} with the same prop contract as a component (type, label, description, default). Components then declare {type: list|group, of: <name>} instead of own props.
 - **list_media** · GET or POST · scope read · required: none  
@@ -427,8 +429,6 @@ tools also answer GET. The exact schemas stand in
   Visitor numbers of the project: unique visitors, page views, bounce rate, top pages and sources, devices, daily trend. Optional days (1-90, default 30). A source reads by one name however it arrived (`Google` for google.com, google.de and utm_source=google). `channels` counts every visitor once by the kind of source: `direct`, `search`, `ai` (ChatGPT, Perplexity, Claude, Gemini and other assistants), `social`, `other`.
 - **list_builds** · GET or POST · scope read · required: none  
   All built versions with the latest and live pointer, reason, and time — the basis for rollback_live. `search_engines` says what became of the latest report of changed addresses to search engines (see go_live), where one was made.
-- **read_guide** · GET or POST · scope read · required: none  
-  The building guide. This copy carries it beside this file: `guide-draft.md` and `guide-component.md`.
 - **list_pages** · GET or POST · scope read · required: none  
   All pages with stable ID, name, title, and path. Internal link values point at these IDs via {type: 'page', page: '<id>'} — never at paths. `hidden`: true marks a page kept out of search engines (submit_page hidden).
 - **read_history** · GET or POST · scope read · required: name  

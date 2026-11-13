@@ -6,7 +6,7 @@ not be able to break anything. That is exactly why the contract is
 tight.
 
 If the task is to turn a **design draft** into a whole component set —
-a new project or an additional draft page — then `cleverpage-draft` is
+a new project or an additional draft page — then `guide-draft.md` is
 the right guide. This one is about the single component.
 
 ## Workflow
@@ -24,7 +24,7 @@ the right guide. This one is about the single component.
    rejects, it names every defect — fix, submit again. On rejection
    nothing is written.
 
-## The contract since concepts/14 — read this first
+## The contract — read this first
 
 A component **may design, but every visible value is a name from the
 site's design system**. The gate enforces exactly this, so a style swap
