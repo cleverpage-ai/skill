@@ -69,10 +69,10 @@ means you are connected.
 
        umask 077; F=~/.config/cleverpage/token; C=~/.config/cleverpage/connect.json
        while :; do
-         s=$(curl -s -o "$F.new" -w '%{http_code}' -X POST https://app.cleverpage.ai/api/v1/connect/token \
-             -H "Content-Type: application/json" -d @"$C")
-         if [ "$s" = 200 ]; then mv "$F.new" "$F"; rm -f "$C"; echo connected; break; fi
-         grep -qE 'authorization_pending|slow_down' "$F.new" || { cat "$F.new"; rm -f "$F.new" "$C"; break; }
+         curl -s -o "$F.new" -w '%{http_code}' -X POST https://app.cleverpage.ai/api/v1/connect/token \
+             -H "Content-Type: application/json" -d @"$C" > "$F.code"
+         if grep -qx 200 "$F.code"; then mv "$F.new" "$F"; rm -f "$C" "$F.code"; echo connected; break; fi
+         grep -qE 'authorization_pending|slow_down' "$F.new" || { cat "$F.new"; rm -f "$F.new" "$F.code" "$C"; break; }
          sleep 5
        done
 
