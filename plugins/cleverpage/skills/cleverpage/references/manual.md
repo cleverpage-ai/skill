@@ -1,7 +1,7 @@
 # Cleverpage API — manual for agents
 
 This copy came with the Cleverpage plugin and describes contract
-1.20.9 of 2026-11-13. The building guide lies beside it:
+1.20.10 of 2026-11-15. The building guide lies beside it:
 `guide-draft.md` and `guide-component.md`.
 
 Cleverpage runs websites built from typed components. You build and
@@ -43,6 +43,12 @@ the contract; what is refused names every defect and writes nothing.
   Build only through `https://app.cleverpage.ai/api/v1`: the person looks for the website in
   her account at `https://app.cleverpage.ai`, and a website built anywhere else (a
   local server, another account) does not exist for her.
+- **The website is hers, and she works on it too.** She and her team
+  change things in Cleverpage directly, at any time: pages, the domain,
+  the password, legal texts, forms, settings. What a read tool answers
+  now is the state; what you remember from earlier is not. Read before
+  you change or describe something, and work with what is there, also
+  when you did not put it there.
 - **Her yes before anything goes live.** Publishing, reverting and
   rolling back need `confirm`; ask her first.
 
@@ -125,7 +131,7 @@ same command and never in the address, your product, and the contract
 this copy describes:
 
     curl -s -H "Authorization: Bearer $(cat ~/.config/cleverpage/token)" \
-        -H "X-Cleverpage-Agent: <your product>" -H "X-Cleverpage-Manual: 1.20.9" \
+        -H "X-Cleverpage-Agent: <your product>" -H "X-Cleverpage-Manual: 1.20.10" \
         https://app.cleverpage.ai/api/v1/me
 
 `/me` answers who she is, her organisations and what this token is: its
@@ -146,10 +152,10 @@ macOS, ties `path` to `PATH`: after `path=…` or `for path in …` no
 command is found any more (`curl`, `cat`, `python3`: exit 127). Call
 it `page_path` or `address`.
 
-This copy describes contract 1.20.9. Say so in every call, beside
+This copy describes contract 1.20.10. Say so in every call, beside
 your product:
 
-    -H "X-Cleverpage-Agent: <your product>" -H "X-Cleverpage-Manual: 1.20.9"
+    -H "X-Cleverpage-Agent: <your product>" -H "X-Cleverpage-Manual: 1.20.10"
 
 `/me` then answers `manual`: `yours`, `current` and `outdated`. With
 `outdated: true` the plugin has a newer version. Tell her so in one
@@ -372,6 +378,10 @@ do not paste them. Never put a token, a password or personal data from
 the website's content into a report. Up to ten reports a day per token;
 the answer is `201` with an `id`.
 
+A value you did not set is not a defect: someone set it in Cleverpage.
+Before you report an answer as wrong, read the tool that owns the value
+(`read_domain` for a domain) and ask her.
+
 ## Tools
 
 Every project tool is `POST https://app.cleverpage.ai/api/v1/projects/<project>/<tool>`; read
@@ -511,7 +521,7 @@ tools also answer GET. The exact schemas stand in
 - **order_collection** · POST · scope build · required: collection, order  
   Set the order of a collection's entries: every id, in the order wanted.
 - **read_domain** · GET or POST · scope read · required: none  
-  The project's domain: the main spelling, whether www redirects, and whether DNS already points here (checked now).
+  The project's domain: the main spelling, whether www redirects, and whether DNS already points here (checked now). registered: false means the domain does not exist yet and has to be bought first.
 - **connect_domain** · POST · scope operate · required: domain · confirm required  
   Connect a domain the organisation owns: records the domain, sets the site's base address and the CDN hostname. main says which spelling is the one (apex or www); the other redirects. DNS is set by a human at the registrar; read_domain says what is still missing. Buying a domain is an owner's click in the interface, never a call here.
 - **remove_domain** · POST · scope operate · required: none · confirm required  

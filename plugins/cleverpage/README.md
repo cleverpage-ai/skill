@@ -1,10 +1,10 @@
 # Cleverpage for Claude
 
-Build, change and run client websites with Claude. Cleverpage hosts the website and gives your client an editor for texts, images and news.
+Build, publish and run client websites with Claude. Cleverpage hosts the website under its own domain, handles its forms and gives your client an editor for texts, images and news.
 
 ## What the plugin does
 
-It adds one skill, `cleverpage`. The skill applies when you mention Cleverpage or a website you build or run there. Claude then works through the Cleverpage API: it sets up the design system, builds the components, creates the pages, uploads your images and films, and puts finished pages on staging. Going live happens only after your explicit yes.
+It adds one skill, `cleverpage`. The skill applies when you mention Cleverpage or a website you build or run there, and when a website or draft you built with Claude should go online or be handed to a client. Claude then works through the Cleverpage API: it sets up the design system, builds the components, creates the pages, uploads your images and films, and puts finished pages on staging. Going live happens only after your explicit yes.
 
 The plugin contains the skill, the manual of the Cleverpage API and the building guide for components, each as of the API version named in it. It has no hooks, no scripts and no MCP server.
 
@@ -19,6 +19,10 @@ The plugin contains the skill, the manual of the Cleverpage API and the building
 
 ```
 Build a website for a physiotherapy practice with Cleverpage.
+```
+
+```
+I built this website draft with Claude. Put it online with Cleverpage so that my client can change the texts.
 ```
 
 ```

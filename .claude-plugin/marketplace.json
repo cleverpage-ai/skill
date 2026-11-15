@@ -9,10 +9,10 @@
     {
       "name": "cleverpage",
       "source": "./plugins/cleverpage",
-      "description": "Build, change or continue a website with Cleverpage. The skill brings the manual of the Cleverpage API and its building guide along.",
+      "description": "Put a website built with Claude online and hand it to your client. Cleverpage hosts it under its own domain, handles the forms and gives your client an editor for texts and images. Claude builds the website there or translates an existing draft into it.",
       "homepage": "https://www.cleverpage.ai",
       "license": "MIT",
-      "keywords": ["website", "cms", "hosting", "editor"]
+      "keywords": ["website", "cms", "hosting", "editor", "publish", "domain", "forms", "client"]
     }
   ]
 }
