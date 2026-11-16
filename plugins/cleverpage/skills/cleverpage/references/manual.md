@@ -1,7 +1,7 @@
 # Cleverpage API — manual for agents
 
 This copy came with the Cleverpage plugin and describes contract
-1.20.10 of 2026-11-15. The building guide lies beside it:
+1.20.13 of 2026-11-16. The building guide lies beside it:
 `guide-draft.md` and `guide-component.md`.
 
 Cleverpage runs websites built from typed components. You build and
@@ -131,7 +131,7 @@ same command and never in the address, your product, and the contract
 this copy describes:
 
     curl -s -H "Authorization: Bearer $(cat ~/.config/cleverpage/token)" \
-        -H "X-Cleverpage-Agent: <your product>" -H "X-Cleverpage-Manual: 1.20.10" \
+        -H "X-Cleverpage-Agent: <your product>" -H "X-Cleverpage-Manual: 1.20.13" \
         https://app.cleverpage.ai/api/v1/me
 
 `/me` answers who she is, her organisations and what this token is: its
@@ -152,10 +152,10 @@ macOS, ties `path` to `PATH`: after `path=…` or `for path in …` no
 command is found any more (`curl`, `cat`, `python3`: exit 127). Call
 it `page_path` or `address`.
 
-This copy describes contract 1.20.10. Say so in every call, beside
+This copy describes contract 1.20.13. Say so in every call, beside
 your product:
 
-    -H "X-Cleverpage-Agent: <your product>" -H "X-Cleverpage-Manual: 1.20.10"
+    -H "X-Cleverpage-Agent: <your product>" -H "X-Cleverpage-Manual: 1.20.13"
 
 `/me` then answers `manual`: `yours`, `current` and `outdated`. With
 `outdated: true` the plugin has a newer version. Tell her so in one
@@ -237,7 +237,9 @@ working.
    then `submit_collection_entry` per entry) and a component with a
    `collection` prop that loops over `entries | collection_entries`. The
    studio and `links.preview` show the entries at once; staging and the
-   website only after `publish_collection`. A page per entry:
+   website only after `publish_collection`. The entries that are there,
+   the editorial team's too, with their ids: `list_collection_entries`.
+   A page per entry:
    `submit_page` with `"entry_of": "c-…"` and the address before the
    entry's slug (`"/news"` answers at `/news/<slug>`). A prop value
    `{"entry": "<field>"}` shows that field of each entry, and an
@@ -423,7 +425,7 @@ tools also answer GET. The exact schemas stand in
 - **submit_collection** · POST · scope build · required: definition  
   Create an entry schema for structured content without a build (news, events, job listings). Field types: text, richtext, number, boolean, select, date, image, file, link — as with component props, with label and description per field. Embedded via a component with a collection prop; rendered with the filters collection_entries (build-time state) and collection_package (live package URL for the data island). Say localizable on every text a visitor reads: true makes it translatable, and an entry's page appears in a further language once its translatable fields are translated; false for what reads the same in every language (a name, a place).
 - **list_collections** · GET or POST · scope read · required: none  
-  All collections of the project with IDs and entry counts — read before every submit_collection.
+  All collections of the project with IDs and entry counts — read before every submit_collection. The entries themselves: list_collection_entries.
 - **list_types** · GET or POST · scope read · required: none  
   The project-wide types: named field sets such as service, team_member, opening_hours that components reuse with {type: list, of: <name>}. Read before modelling a list or group — reuse beats reinventing.
 - **submit_types** · POST · scope build · required: types  
@@ -516,10 +518,12 @@ tools also answer GET. The exact schemas stand in
   Remove a folder; its items move one level up.
 - **delete_collection** · POST · scope operate · required: collection · confirm required  
   Delete a collection with all its entries. The website changes with the next content release.
+- **list_collection_entries** · GET or POST · scope read · required: collection  
+  The entries of one collection as they stand in the draft, in the collection's order: id, slug, visible, visible_from, order, changed and the values, in the form submit_collection_entry takes back. Entries the editorial team wrote in the studio are here too. Read it before you replace, hide, delete or order entries you did not submit in this session: to hide one, send its values again with its id and visible false. At most `limit` entries per call (100 when omitted, 500 at most), from `offset` on; `total` says how many there are and `next_offset` where to read on.
 - **delete_collection_entry** · POST · scope operate · required: collection, id · confirm required  
-  Remove one entry from a collection's draft; live changes with the next publish_collection.
+  Remove one entry from a collection's draft (its id from list_collection_entries); live changes with the next publish_collection.
 - **order_collection** · POST · scope build · required: collection, order  
-  Set the order of a collection's entries: every id, in the order wanted.
+  Set the order of a collection's entries: every id (from list_collection_entries), in the order wanted.
 - **read_domain** · GET or POST · scope read · required: none  
   The project's domain: the main spelling, whether www redirects, and whether DNS already points here (checked now). registered: false means the domain does not exist yet and has to be bought first.
 - **connect_domain** · POST · scope operate · required: domain · confirm required  
