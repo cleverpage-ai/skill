@@ -1,7 +1,7 @@
 # Cleverpage API — manual for agents
 
 This copy came with the Cleverpage plugin and describes contract
-1.20.13 of 2026-11-16. The building guide lies beside it:
+1.20.16 of 2026-11-19. The building guide lies beside it:
 `guide-draft.md` and `guide-component.md`.
 
 Cleverpage runs websites built from typed components. You build and
@@ -131,7 +131,7 @@ same command and never in the address, your product, and the contract
 this copy describes:
 
     curl -s -H "Authorization: Bearer $(cat ~/.config/cleverpage/token)" \
-        -H "X-Cleverpage-Agent: <your product>" -H "X-Cleverpage-Manual: 1.20.13" \
+        -H "X-Cleverpage-Agent: <your product>" -H "X-Cleverpage-Manual: 1.20.16" \
         https://app.cleverpage.ai/api/v1/me
 
 `/me` answers who she is, her organisations and what this token is: its
@@ -152,10 +152,10 @@ macOS, ties `path` to `PATH`: after `path=…` or `for path in …` no
 command is found any more (`curl`, `cat`, `python3`: exit 127). Call
 it `page_path` or `address`.
 
-This copy describes contract 1.20.13. Say so in every call, beside
+This copy describes contract 1.20.16. Say so in every call, beside
 your product:
 
-    -H "X-Cleverpage-Agent: <your product>" -H "X-Cleverpage-Manual: 1.20.13"
+    -H "X-Cleverpage-Agent: <your product>" -H "X-Cleverpage-Manual: 1.20.16"
 
 `/me` then answers `manual`: `yours`, `current` and `outdated`. With
 `outdated: true` the plugin has a newer version. Tell her so in one
@@ -170,6 +170,8 @@ working.
 2. `GET https://app.cleverpage.ai/api/v1/projects` — the projects; `POST https://app.cleverpage.ai/api/v1/projects` with
    `{"display_name": "…"}` makes a new one as a draft, with several
    organisations `{"display_name": "…", "organization": "<name>"}`.
+   The website is German unless you name the language it is written in:
+   `"language": "en"` (an ISO code).
    In every address and in `confirm`, `<project>` is a project's `project`
    from that list; its `name` is what she calls the website.
 3. Read `guide-draft.md` beside this file when you translate a design,
@@ -284,6 +286,13 @@ there.
 
 A website has a default language and may have further ones; each gets its
 own addresses (`/en/…`), and visitors switch between them.
+
+A website in one language has that language as its default and no further
+one. A new website is German unless it was made with `language`. To change
+the one language it has: `set_languages` with `{"default": "en"}` alone.
+Do not keep the old language under `additional`: every code there is a
+further language with addresses of its own, and activating the website
+books it.
 
 1. Read `limits.languages` in `GET https://app.cleverpage.ai/api/v1/projects/<project>/activation`.
    `null`: the website is not activated, languages cost nothing yet. A
@@ -479,7 +488,7 @@ tools also answer GET. The exact schemas stand in
 - **rollback_live** · POST · scope operate · required: build · confirm required  
   Roll the live site back to an earlier build (build from list_builds). Owners only. The addresses it changes are reported to search engines as after go_live.
 - **set_languages** · POST · scope build · required: none  
-  Set the project's default language and additional languages (ISO codes like de, en). How many languages the website may have now stands in its activation's limits.languages (1: one language only). Keeping or dropping languages always works. Adding one may be refused: the refusal says why, and where a person has to book first it carries book_url and what to tell her. Never book yourself.
+  Set the project's default language and additional languages (ISO codes like de, en). A website in one language names only default: every code under additional is a further language of its own, booked once the website is activated. How many languages the website may have now stands in its activation's limits.languages (1: one language only). Keeping or dropping languages always works. Adding one may be refused: the refusal says why, and where a person has to book first it carries book_url and what to tell her. Never book yourself.
 - **set_branding** · POST · scope build · required: kind, data  
   Set the favicon or social sharing image (base64 PNG/JPG, at least 48x48). All formats are generated automatically; optional x/y (percent center) and zoom for cropping. Takes effect with the next publish.
 - **set_maintenance** · POST · scope operate · required: on · confirm required  
@@ -525,9 +534,9 @@ tools also answer GET. The exact schemas stand in
 - **order_collection** · POST · scope build · required: collection, order  
   Set the order of a collection's entries: every id (from list_collection_entries), in the order wanted.
 - **read_domain** · GET or POST · scope read · required: none  
-  The project's domain: the main spelling, whether www redirects, and whether DNS already points here (checked now). registered: false means the domain does not exist yet and has to be bought first.
+  The project's domain: the main spelling, whether www redirects, and whether DNS already points here (checked now). registered: false means the domain does not exist yet and has to be bought first; a row with taken: true belongs to another website. seamless_move says whether the domain moves without interruption and, while it does, its state and the two TXT records to add first (verify), or that the certificate is ready (ready: go live, then set the usual records; live: set the usual records).
 - **connect_domain** · POST · scope operate · required: domain · confirm required  
-  Connect a domain the organisation owns: records the domain, sets the site's base address and the CDN hostname. main says which spelling is the one (apex or www); the other redirects. DNS is set by a human at the registrar; read_domain says what is still missing. Buying a domain is an owner's click in the interface, never a call here.
+  Connect a domain the organisation owns: records the domain, sets the site's base address and the CDN hostname. main says which spelling is the one (apex or www); the other redirects. DNS is set by a human at the registrar; read_domain says what is still missing. Refused while another website that is not archived holds either spelling, or any website of another organisation does. Buying a domain is an owner's click in the interface, never a call here. seamless_move: true for a domain that already runs a website: two TXT records prove the domain and prepare the certificate before the DNS moves, so visitors never see an error; read_domain names them. Sent again with the same domain it switches the move on or off; left out, a new domain moves the usual way.
 - **remove_domain** · POST · scope operate · required: none · confirm required  
   Disconnect the domain; the website keeps running under its project address.
 - **set_site_password** · POST · scope build · required: password  
@@ -535,7 +544,7 @@ tools also answer GET. The exact schemas stand in
 - **adopt_fonts** · POST · scope build · required: fonts  
   Bring web fonts into the project: for each family (a slug like "shippori-mincho", "hanken-grotesk"; Google Fonts names, lower-case with hyphens) the files are fetched once and laid into the site under uploads/fonts, where the build serves them itself. The answer gives the entries for typography.fonts of the design system: name, stylesheet path, fallback. Fonts named only by name, without this, fall back to system fonts on the website.
 - **archive_project** · POST · scope operate · required: archived · confirm required  
-  archived=true takes the website offline (live and staging answer 410, billing stops, data stays); archived=false brings it back. Needs the right billing. Deleting for good stays in the interface.
+  archived=true takes the website offline (live and staging answer 410, billing stops, data stays); archived=false brings it back. Needs the right billing. Brought back, it gives up its domain when another website holds it by now. Deleting for good stays in the interface.
 - **get_media_job** · GET or POST · scope read · required: job  
   The state of a film's conversion after its upload: waiting, running, done or error, and its progress. Ask with the film's media id (m-…) as job.
 
