@@ -1,7 +1,7 @@
 # Cleverpage API — manual for agents
 
 This copy came with the Cleverpage plugin and describes contract
-1.20.16 of 2026-11-19. The building guide lies beside it:
+1.20.17 of 2026-11-21. The building guide lies beside it:
 `guide-draft.md` and `guide-component.md`.
 
 Cleverpage runs websites built from typed components. You build and
@@ -131,7 +131,7 @@ same command and never in the address, your product, and the contract
 this copy describes:
 
     curl -s -H "Authorization: Bearer $(cat ~/.config/cleverpage/token)" \
-        -H "X-Cleverpage-Agent: <your product>" -H "X-Cleverpage-Manual: 1.20.16" \
+        -H "X-Cleverpage-Agent: <your product>" -H "X-Cleverpage-Manual: 1.20.17" \
         https://app.cleverpage.ai/api/v1/me
 
 `/me` answers who she is, her organisations and what this token is: its
@@ -152,10 +152,10 @@ macOS, ties `path` to `PATH`: after `path=…` or `for path in …` no
 command is found any more (`curl`, `cat`, `python3`: exit 127). Call
 it `page_path` or `address`.
 
-This copy describes contract 1.20.16. Say so in every call, beside
+This copy describes contract 1.20.17. Say so in every call, beside
 your product:
 
-    -H "X-Cleverpage-Agent: <your product>" -H "X-Cleverpage-Manual: 1.20.16"
+    -H "X-Cleverpage-Agent: <your product>" -H "X-Cleverpage-Manual: 1.20.17"
 
 `/me` then answers `manual`: `yours`, `current` and `outdated`. With
 `outdated: true` the plugin has a newer version. Tell her so in one
@@ -190,8 +190,9 @@ working.
 5. Types, then components: `list_types`, `submit_types`;
    `list_components`, `read_component`, `submit_component` with
    `{"name", "schema", "template", "reason"}`. Header and footer are
-   components of kind `layout`, placed with `submit_layout`
-   (`{"part": "header", "instances": [{"component": …, "props": {…}}]}`).
+   components of kind `layout`, placed with `submit_layout` and one list,
+   the page's content marked by a slot: `{"content": [{"component": "site-header",
+   "props": {…}}, {"slot": true}, {"component": "site-footer", "props": {…}}]}`.
    The site's base CSS (`box-sizing`, `body` margin, smooth scrolling)
    goes in once with `submit_layout` and `{"part": "base", "source": "…"}`.
 6. Images and files: `POST https://app.cleverpage.ai/api/v1/projects/<project>/media` as
@@ -414,7 +415,7 @@ tools also answer GET. The exact schemas stand in
 - **revert_design_system_v2** · POST · scope operate · required: number · confirm required  
   Restore an earlier v2 design system build. The build is resubmitted through the gate as a new numbered build — the history is never shortened.
 - **submit_layout** · POST · scope build · required: none  
-  Set a layout — the frame around every page that uses it. PREFERRED for header and footer: part="header"/"footer" with instances — a list of component instances like page content ([{"component": "site-header", "props": {…}}]). They render once per page, stay editable with props and may carry islands. Alternatively source sets Liquid source: part="page" is ONE template with a {% content %} slot (it can WRAP the content), part="header"/"footer" the older split form, part="base" the base CSS of the whole site. Source layouts have no props. A project may have several layouts: without a name you write the "standard" layout, which applies to every page that does not pick one; with a name you write that layout, and a page joins it through its "layout" field (submit_page). list_layouts shows which pages use what.
+  Set a layout — the frame around every page that uses it. Header and footer go in with content: ONE list of component instances like page content, with exactly one {"slot": true} entry where each page's content goes ([{"component": "site-header", "props": {…}}, {"slot": true}, {"component": "site-footer", "props": {…}}]); list_layouts answers in the same shape. The instances render once per page, stay editable with props and may carry islands. Liquid source goes in with part and source instead: part="page" is ONE template with a {% content %} slot (it can WRAP the content), part="header"/"footer" the older split form, part="base" the base CSS of the whole site. Source layouts have no props. A project may have several layouts: without a name you write the "standard" layout, which applies to every page that does not pick one; with a name you write that layout, and a page joins it through its "layout" field (submit_page). list_layouts shows which pages use what.
 - **submit_page** · POST · scope build · required: content  
   Create a page or set its content. content is the list of entries: [{"component": "name", "props": {…}}] — a form sits on the page the same way, as {"form": "f-…"}. Per entry, optional spacing_top/spacing_bottom: a factor of the default section gap --spacing-section (0, 0.25, 0.5, 0.75, 1.25, 1.5, 1.75, 2 — 1 = default = omit) or a length like '48px'. The texts and images of the page belong in each entry's props; a prop the entry leaves out is filled from the component's default. A NEW page requires path and gets a stable ID. in_menu true adds a page to the menu, new or not, false takes it out; menu_text names its item. A new path on an existing page is a move — the old path redirects automatically. Validated automatically, but writes only the DRAFT version — the page only reaches the website via publish([...]). Feel free to submit repeatedly and publish only once the page is finished. To change an EXISTING page, read_page first, change only what the task needs and send its version as base_version: a person may have edited the page in the studio, and a submission from an older copy brings back what they removed. A page saved since answers 409 with who saved what.
 - **publish** · POST · scope operate · required: none · confirm required  
@@ -424,7 +425,7 @@ tools also answer GET. The exact schemas stand in
 - **publish_collection** · POST · scope operate · required: collection · confirm required  
   Content release of a collection: the visible entries are frozen as an immutable package and go live — without a build. Rolling back is just a pointer. Until then the studio and the preview show the entries, staging and the website do not.
 - **submit_form** · POST · scope build · required: definition  
-  Create or replace a form (field definitions, target, spam protection, consent text). Field types: text, textarea, email, phone, number, date, select, checkbox, rating, file, content, divider. Field keys: name, label, type, required?, placeholder?, options?, width? (full|half), default?, error_text?, pattern? (letters|postcode|url), regex?, min/max?, visible_if? {field, is: equals|not_equals|contains, value}, step?. Form keys: name, fields, consent? (may link: [Datenschutz](/datenschutz)), target? {mail: [addresses], webhook: {url}, notify?: 'notice', receipt?: true}, receipt: true mails the sender a confirmation of receipt (no content of the message) to the address in the form's email field; it needs one. message?, redirect?, window? {from?, to?}, retention? ('90'|'180'|'365'|'0'), spam_check?, steps?, access?, origins?, allow_localhost?, id (only when replacing). Availability (access): “public” anyone may submit · “restricted” own site, the origins listed in origins (a leading * covers subdomains) and localhost · “private” only with the project key in the X-API-Key header — a private form must not be placed on a page. Own markup: GET <action>/definition returns the fields plus “revision”. Send that value back in the field named by “revision_field” (_fassung) — then a submission is validated against the questions your form actually shows and is filed under that revision, even if the editors renamed an option in the meantime. Without it, the current definition applies. Place it on a page like a component (submit_page entry {"form": "f-…"}), or build your own markup: in the template, form | form_fields yields the field list and form | form_action the submit address. A form that carries a component belongs to it: its questions come from that component's inbox and stay as they are — change them by rebuilding the component. Its name follows the component's displayName (rename the component to rename it). Everything else (target, retention, access, spam check) is yours to set. Spam protection: an invisible honeypot field and the origin check (access) are always on. spam_check: true adds a small sum (“4 + 7”) the visitor solves before sending, checked on the server, good for one submission, without a third party or a cookie. Nothing reads what a submission says. Leave it off until spam arrives: it costs every visitor a step. On a multilingual website the texts stay in the default language where they are, and translations? holds each further language's words: {"en": {fields: {<field name>: {label?, placeholder?, error_text?, options?: [one text per option]}}, texts?: [content blocks in order], steps?, message?, consent?, submit_label?, next_label?, back_label?}}. A word left out reads in the default language; an option sends its default value in every language. A form on /en/ reads English, and its thanks and refusals answer in it.
+  Create or replace a form (field definitions, target, spam protection, consent text). Field types: text, textarea, email, phone, number, date, select, checkbox, rating, file, content, divider. Field keys: name, label, type, required?, placeholder? (a select without a default shows it as its empty first choice), options?, width? (full|half), default?, error_text?, pattern? (letters|postcode|url), regex?, min/max?, visible_if? {field, is: equals|not_equals|contains, value}, step?. Form keys: name, fields, consent? (may link: [Datenschutz](/datenschutz)), target? {mail: [addresses], webhook: {url}, notify?: 'notice', receipt?: true}, receipt: true mails the sender a confirmation of receipt (no content of the message) to the address in the form's email field; it needs one. message?, redirect?, window? {from?, to?}, retention? ('90'|'180'|'365'|'0'), spam_check?, steps?, access?, origins?, allow_localhost?, id (only when replacing). Availability (access): “public” anyone may submit · “restricted” own site, the origins listed in origins (a leading * covers subdomains) and localhost · “private” only with the project key in the X-API-Key header — a private form must not be placed on a page. Own markup: GET <action>/definition returns the fields plus “revision”. Send that value back in the field named by “revision_field” (_fassung) — then a submission is validated against the questions your form actually shows and is filed under that revision, even if the editors renamed an option in the meantime. Without it, the current definition applies. Place it on a page like a component (submit_page entry {"form": "f-…"}), or build your own markup: in the template, form | form_fields yields the field list and form | form_action the submit address. A form that carries a component belongs to it: its questions come from that component's inbox and stay as they are — change them by rebuilding the component. Its name follows the component's displayName (rename the component to rename it). Everything else (target, retention, access, spam check) is yours to set. Spam protection: an invisible honeypot field and the origin check (access) are always on. spam_check: true adds a small sum (“4 + 7”) the visitor solves before sending, checked on the server, good for one submission, without a third party or a cookie. Nothing reads what a submission says. Leave it off until spam arrives: it costs every visitor a step. On a multilingual website the texts stay in the default language where they are, and translations? holds each further language's words: {"en": {fields: {<field name>: {label?, placeholder?, error_text?, options?: [one text per option]}}, texts?: [content blocks in order], steps?, message?, consent?, submit_label?, next_label?, back_label?}}. A word left out reads in the default language; an option sends its default value in every language. A form on /en/ reads English, and its thanks and refusals answer in it.
 - **submit_block** · POST · scope build · required: block  
   Create or replace a block: reusable page content. A block is a list of page entries — same components, same gate — maintained in ONE place and placed on many pages ({"block": "b-…"} as a page entry). It is resolved at build time, not copied: one edit reaches every page. Blocks may contain blocks (up to 5 levels); a block that contains itself is rejected.
 - **list_blocks** · GET or POST · scope read · required: none  
@@ -468,7 +469,7 @@ tools also answer GET. The exact schemas stand in
 - **update_request** · POST · scope build · required: id, state  
   Accept or decline a request. Delivery does not happen here but via submit_component(request=…) — so a request only counts as done when a submission was actually accepted.
 - **read_approvals** · GET or POST · scope read · required: none  
-  The approval queue: which pages have open changes, which are new, where approval has been requested. With page=... also both versions of that page as HTML, before (published) and after (the working state). Publishing still happens via publish([...]).
+  The approval queue: which pages have open changes, which are new, where approval has been requested, and which approved pages still wait for the build that puts them on staging (awaiting_build; publish builds it). With page=... also both versions of that page as HTML, before (published) and after (the working state). Publishing still happens via publish([...]).
 - **edit_page** · GET or POST · scope read · required: none  
   A page as it renders: the working state's HTML, its blocks with their props, and where a person edits it (cleverpage_url). Without name, returns the list of pages. Changes go through submit_page.
 - **build_component** · GET or POST · scope read · required: none  

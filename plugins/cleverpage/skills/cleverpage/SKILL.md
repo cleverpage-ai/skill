@@ -9,7 +9,7 @@ description: Build, publish and run a website with Cleverpage, which hosts it un
    may reach it, tell her in one sentence that you build her website
    through it and need only this address.
 2. Read [references/manual.md](references/manual.md) completely before the
-   first call. It came with this skill and describes contract 1.20.16 (2026-11-19);
+   first call. It came with this skill and describes contract 1.20.17 (2026-11-21);
    work by it, not by what you remember from earlier sessions.
 3. The token lies in ~/.config/cleverpage/token. Check it with `GET https://app.cleverpage.ai/api/v1/me` as the
    manual shows; never print it. Without the file, or on 401, connect as
@@ -21,7 +21,7 @@ description: Build, publish and run a website with Cleverpage, which hosts it un
 
 ## What lies beside this file
 
-The manual and the building guide of the Cleverpage API, contract 1.20.16 (2026-11-19).
+The manual and the building guide of the Cleverpage API, contract 1.20.17 (2026-11-21).
 You work by these files; none of them is fetched from the server.
 
 - [references/manual.md](references/manual.md): connecting, signing a call, the order of the work,

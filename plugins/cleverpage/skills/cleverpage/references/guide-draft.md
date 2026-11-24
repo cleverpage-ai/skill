@@ -46,8 +46,8 @@ It is not yours to choose; validation enforces it:
 4. **Types and components** (`submit_types`, then `submit_component`,
    one after the other; header and footer are components of kind
    `layout`)
-5. **Layout** (`submit_layout`, parts `header` and `footer` with
-   `instances`)
+5. **Layout** (`submit_layout` with `content`: the header, one
+   `{"slot": true}` entry where each page's content goes, the footer)
 6. **Pages** (`submit_page`), with the draft's texts in the props
 7. **Look at it**, then publish once
 
@@ -105,8 +105,9 @@ Two traps from practice:
 
 **Top-level `<section>` is the default cut.** Held both times. What
 sits above it (header) and below it (footer) is layout: a component of
-kind `layout`, placed once with `submit_layout` (`part` `header` or
-`footer`, `instances` like page content). It appears on every page and
+kind `layout`, placed once with `submit_layout` (`content`, a list like
+page content with one `{"slot": true}` entry between header and footer).
+It appears on every page and
 keeps its props, so the editor changes the menu or the button text
 there.
 

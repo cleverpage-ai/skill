@@ -118,15 +118,15 @@ are written in English.)
 
 ```json
 {
-  "id": "preis-tafel",
-  "name": "preis-tafel",
-  "displayName": "Preistafel",
-  "description": "Drei Preise nebeneinander, jeder mit Titel und Betrag.",
+  "id": "price-table",
+  "name": "price-table",
+  "displayName": "Price table",
+  "description": "Three prices side by side, each with a title and an amount.",
   "kind": "section",
   "props": {
-    "ueberschrift": {
-      "role": "content", "type": "text", "label": "Überschrift", "localizable": true,
-      "description": "Steht über den Preisen.", "default": "Unsere Preise"
+    "heading": {
+      "role": "content", "type": "text", "label": "Heading", "localizable": true,
+      "description": "Stands above the prices.", "default": "Our prices"
     }
   }
 }
@@ -204,7 +204,7 @@ missing, the logic belongs in an island.
 | `text` carries **bold** and *italic* by itself: `**…**`, `*…*` | The core renders the marks wherever a text prop stands as text, and leaves the bare words in an attribute or a title. Output it as `{{ title }}`, never through `\| markdown`, and never split one sentence into several props only to emphasize a word |
 | `richtext` in the template always via `{{ text \| markdown }}` | The editor's Markdown (paragraphs, `##`/`###`, `-`/`1.` lists, `**bold**`, `*italic*`, `` `code` ``, `[text](target)`, and a table as a block of lines that each begin with `\|`: the header row, `\| --- \| --- \|` under it, then the rows; a cell holds one line and its marks) becomes HTML — without the filter, visitors would see asterisks. HTML in the value is escaped; `\| markdown` belongs ONLY on richtext |
 | References as a `link` prop, and `{{ target \| link }}` in the template | Internal targets point at page IDs and survive every rename |
-| Media: `{{ picture \| image }}` is the whole `<img>` with its sizes, loading lazily; `{{ logo \| image: "eager" }}` loads at once, for a picture visible without scrolling outside the content (a logo in the header; the content's first picture is made eager by the build), and a ratio goes beside it (`image: "3:2", "eager"`); `{{ picture \| image_source }}` the bare address; `{{ clip \| video }}` a player that streams the film in the size the visitor's line carries (only its still loads before Play), `{{ clip \| video: "loop" }}` the same film playing by itself, muted, in a loop and without controls, for a background or a short clip that shows something: it starts once it is laid out and in view (not in a closed tab, not below the fold), sharp from its first picture, and rests when it is not; an island may drive that `<video>` with `play()`, `pause()`, `currentTime` and `loop`, and a clip it plays starts wherever it is; `{{ clip \| video_source }}` the bare address of its 720p MP4, for a player of your own, which is never as sharp as the upload: where sharpness counts, take the loop and drive it; `{{ clip \| video_chapters }}` the film's chapters as a list of buttons (see "A film's chapters"), `""` without any; `{{ doc \| file_name }}` and `{{ doc \| file_size }}` name a download ("price-list.pdf", "121 KB") and give `""` when nothing is chosen | The library hands out ids; the filters turn them into what the page needs |
+| Media: `{{ picture \| image }}` is the whole `<img>` with its sizes, loading lazily, and with the focal point the editors set as its `object-position`, so a frame that crops the picture with `object-fit: cover` keeps what matters in view at every width; `{{ logo \| image: "eager" }}` loads at once, for a picture visible without scrolling outside the content (a logo in the header; the content's first picture is made eager by the build), and a ratio goes beside it (`image: "3:2", "eager"`); `{{ picture \| image_source }}` the bare address, without the focal point, so a picture a frame crops takes `image`; `{{ clip \| video }}` a player that streams the film in the size the visitor's line carries (only its still loads before Play), `{{ clip \| video: "loop" }}` the same film playing by itself, muted, in a loop and without controls, for a background or a short clip that shows something: it starts once it is laid out and in view (not in a closed tab, not below the fold), sharp from its first picture, and rests when it is not; an island may drive that `<video>` with `play()`, `pause()`, `currentTime` and `loop`, and a clip it plays starts wherever it is; `{{ clip \| video_source }}` the bare address of its 720p MP4, for a player of your own, which is never as sharp as the upload: where sharpness counts, take the loop and drive it; `{{ clip \| video_chapters }}` the film's chapters as a list of buttons (see "A film's chapters"), `""` without any; `{{ doc \| file_name }}` and `{{ doc \| file_size }}` name a download ("price-list.pdf", "121 KB") and give `""` when nothing is chosen | The library hands out ids; the filters turn them into what the page needs |
 | A legal text the website receives from its provider (IT-Recht Kanzlei, eRecht24; the person connects it under Settings › Legal texts): a `select` prop `kind` with the options `terms`, `privacy`, `imprint`, `withdrawal`, `privacy_social_media`, and `{{ kind \| legal_text }}` in the template, so one component serves every legal page. It renders the text in the page's language as checked HTML inside `<div class="cleverpage-legal-text">` (headings, paragraphs, lists, tables, links), `""` while none was received | The provider keeps the text current and an update reaches the page by itself; a text copied into a prop goes stale the day the provider changes it. Style it through the class, never through the text |
 | `{{ when \| date }}` reads an ISO date (`2027-03-14`, a time after it is fine) in the site's language: "14. März 2027", "14 March 2027"; anything else stays as it is | Dates are stored in one form and shown in the reader's |
 | `link` values: `{type: "page", page: "s-…"}` (page ID, not name or path), `{type: "external", url}`, `mail`/`address`, `phone`/`number`, `file`/`path`, `anchor`/`name`, optional `anchor` with `page`. An address is `https://…`, `mailto:`, `tel:`, a path or `#anchor` | The key per type is fixed — page IDs come from `list_pages`. `javascript:`, `data:` and the like are refused: they would run in the visitor's browser |
@@ -636,11 +636,45 @@ The island is submitted as the `islands` argument of
 Validation checks all the rules above; on violation nothing is
 written.
 
+## A search of the website
+
+Every build carries the words of its pages, and the website answers a
+search at `/_search`: live at the CDN, on staging and in the working
+state behind the website's password, so a search tried there finds
+what stands there and nobody else can ask it. A search box is an
+island that asks it:
+
+```js
+const answer = await dienste.holen(
+  `/_search?q=${encodeURIComponent(words)}&language=${element.dataset.language}`);
+```
+
+- Declare `/_search*` in `island.netz.erlaubt` and in
+  `data-island-netz`; the query string is part of the path.
+- Hand the language over as `data-language="{{ site.languages.current }}"`,
+  as for a collection: a search finds the pages in that language, the
+  default one without it.
+- Further parameters: `page`, and `per_page` (10, at most 50).
+- The answer: `{"results": [{"url", "title", "description", "excerpt"}],
+  "total", "page", "pages", "per_page", "language"}`. The values are
+  plain text: set them with `textContent`, never as HTML.
+- What is found: each page's main heading, description, headings and
+  text. Header, footer, navigation and forms are left out, and so is a
+  page kept out of search engines. Every word must be found, at the
+  beginning of a word or inside one ("küche" finds "Einbauküchen"),
+  regardless of case and accents, ü written as ue, ß as ss, with a typo
+  forgiven from five letters. The best match comes first, a word in a
+  title weighing most. No words, no results: an empty box lists nothing.
+- Without JavaScript there is nobody to ask: `island.ohne_js` says what
+  the shell offers instead (links to the main pages, or nothing).
+
 ## Responsive and accessible
 
 The draft is usually desktop only. The component must work on mobile:
 `clamp()` for font sizes, switch `grid-template-columns` in a
-`@media` query, images with `object-fit`. Every `<img>` needs a
+`@media` query, images with `object-fit` on the `image` filter's
+`<img>` (its focal point decides what a crop keeps; your own
+`object-position` holds where none is set). Every `<img>` needs a
 meaningful `alt` that comes from a prop; interactive elements need
 accessible names.
 
