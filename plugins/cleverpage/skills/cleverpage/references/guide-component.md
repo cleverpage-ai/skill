@@ -652,19 +652,33 @@ const answer = await dienste.holen(
 - Declare `/_search*` in `island.netz.erlaubt` and in
   `data-island-netz`; the query string is part of the path.
 - Hand the language over as `data-language="{{ site.languages.current }}"`,
-  as for a collection: a search finds the pages in that language, the
-  default one without it.
-- Further parameters: `page`, and `per_page` (10, at most 50).
-- The answer: `{"results": [{"url", "title", "description", "excerpt"}],
-  "total", "page", "pages", "per_page", "language"}`. The values are
-  plain text: set them with `textContent`, never as HTML.
+  as for a collection: a search finds the pages in that language. An
+  unknown language, or none, falls back to the default one; `language`
+  in the answer says which one was searched.
+- Further parameters: `page`, and `per_page` (10, at most 50). Both are
+  corrected rather than refused: a page beyond the last is the last,
+  `per_page` is held between 1 and 50. Build the pager from `page`,
+  `pages` and `per_page` in the answer, not from what you asked.
+- The answer: `{"results": [{"url", "title", "description", "excerpt",
+  "matches"}], "total", "page", "pages", "per_page", "language"}`. The
+  values are plain text: set them with `textContent`, never as HTML.
+- `matches` says where the query was found, to mark it:
+  `{"title": [[start, end]], "description": […], "excerpt": […]}`,
+  ascending and apart, counted in UTF-16 code units as JavaScript counts,
+  so `text.slice(start, end)` is the found part. Build the marks as
+  elements (a `<mark>` with `textContent` per part, text nodes between),
+  never as HTML. Only as much is marked as the query reaches ("fähig" in
+  "keimfähig", "Küch" in "Küchen" for "küch"); a word found despite a
+  typo is marked whole.
 - What is found: each page's main heading, description, headings and
   text. Header, footer, navigation and forms are left out, and so is a
   page kept out of search engines. Every word must be found, at the
   beginning of a word or inside one ("küche" finds "Einbauküchen"),
-  regardless of case and accents, ü written as ue, ß as ss, with a typo
-  forgiven from five letters. The best match comes first, a word in a
-  title weighing most. No words, no results: an empty box lists nothing.
+  regardless of case and accents, ü written as ue, ß as ss. From five
+  letters one typo is forgiven: a wrong, missing or extra letter, or two
+  neighbouring letters swapped ("musuem" finds "Museum"); from nine
+  letters two. The best match comes first, a word in a title weighing
+  most. No words, no results: an empty box lists nothing.
 - Without JavaScript there is nobody to ask: `island.ohne_js` says what
   the shell offers instead (links to the main pages, or nothing).
 

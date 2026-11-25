@@ -1,7 +1,7 @@
 # Cleverpage API — manual for agents
 
 This copy came with the Cleverpage plugin and describes contract
-1.20.17 of 2026-11-21. The building guide lies beside it:
+1.20.18 of 2026-11-24. The building guide lies beside it:
 `guide-draft.md` and `guide-component.md`.
 
 Cleverpage runs websites built from typed components. You build and
@@ -131,7 +131,7 @@ same command and never in the address, your product, and the contract
 this copy describes:
 
     curl -s -H "Authorization: Bearer $(cat ~/.config/cleverpage/token)" \
-        -H "X-Cleverpage-Agent: <your product>" -H "X-Cleverpage-Manual: 1.20.17" \
+        -H "X-Cleverpage-Agent: <your product>" -H "X-Cleverpage-Manual: 1.20.18" \
         https://app.cleverpage.ai/api/v1/me
 
 `/me` answers who she is, her organisations and what this token is: its
@@ -152,10 +152,10 @@ macOS, ties `path` to `PATH`: after `path=…` or `for path in …` no
 command is found any more (`curl`, `cat`, `python3`: exit 127). Call
 it `page_path` or `address`.
 
-This copy describes contract 1.20.17. Say so in every call, beside
+This copy describes contract 1.20.18. Say so in every call, beside
 your product:
 
-    -H "X-Cleverpage-Agent: <your product>" -H "X-Cleverpage-Manual: 1.20.17"
+    -H "X-Cleverpage-Agent: <your product>" -H "X-Cleverpage-Manual: 1.20.18"
 
 `/me` then answers `manual`: `yours`, `current` and `outdated`. With
 `outdated: true` the plugin has a newer version. Tell her so in one
@@ -176,7 +176,8 @@ working.
    from that list; its `name` is what she calls the website.
 3. Read `guide-draft.md` beside this file when you translate a design,
    `guide-component.md` for single components. Read it before the first
-   component; the gate checks exactly these rules.
+   component; the gate checks exactly these rules. A search box asks the website's own
+   search (`/_search`); the component guide says how.
 4. The design system first. `adopt_fonts` lays the design's fonts into
    the site; `read_design_system_v2`, then `submit_design_system_v2` with
    `{"tokens": …}`: one base colour per colour world, the fonts, and how
