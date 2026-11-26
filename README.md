@@ -20,6 +20,12 @@ With Cleverpage, the agent builds the site in a system that already comes with t
 
 ```
 /plugin marketplace add cleverpage-ai/skill
+/plugin install cleverpage-latest@cleverpage
+```
+
+`cleverpage-latest` reads the current manual from Cleverpage, so every new tool is there the day it ships. The marketplace also has `cleverpage`, the version for Anthropic's plugin directory: it carries a copy of the manual, makes nothing with AI and is updated only after a review. Install one of the two:
+
+```
 /plugin install cleverpage@cleverpage
 ```
 
@@ -62,7 +68,7 @@ Build a website for a physiotherapy practice with Cleverpage.
 
 What happens next:
 
-1. The agent reads the manual. The plugin brings it along; the other forms read the current one from Cleverpage.
+1. The agent reads the manual: the current one from Cleverpage, or with the directory's plugin `cleverpage` the copy it brings along.
 2. Your browser opens. You sign in or create a free account and click "Connect". No password, no API key in the chat.
 3. The agent asks what you bring: a design, screenshots, an existing website, an idea or nothing.
 4. It builds the design system, the components and the pages. You watch the progress live in your Cleverpage account.
@@ -95,20 +101,22 @@ The agent talks to a plain HTTP API. There is no package to install and no MCP s
 - The access key goes straight into `~/.config/cleverpage/token`. It never appears in the chat.
 - Keys expire after 90 days and can be revoked in your account.
 - Approving for staging and going live are separate steps. Live happens only with your explicit yes.
-- With the single-file skill and the other pointers, the AI may spend credits on generated images or videos only if you allow it when connecting, with a monthly limit. The Claude Code plugin generates none.
+- With `cleverpage-latest`, the single-file skill and the other pointers, the AI may spend credits on generated images or videos only if you allow it when connecting, with a monthly limit. The directory's plugin `cleverpage` generates none.
 
-## What the plugin contains and what the agent fetches
+## What the plugins contain and what the agent fetches
 
-The Claude Code plugin carries everything the agent works by: a short `SKILL.md`, the manual of the Cleverpage API and the building guide for components, each as of the API version named in it. The agent takes no instructions from a server. Once the API is ahead of that copy, the agent learns so when it connects and tells you; you update the plugin under `/plugin`.
+`cleverpage-latest` contains one short `SKILL.md`, the same steps as the single-file skill: the agent reads the current manual on the server and works by it.
 
-The plugin makes no images, videos or audio with AI, and its manual names no tool for it. The agent works with the files you give it and with your website's media library. If you want a generated image, you make it yourself in that library in Cleverpage.
+The directory's plugin `cleverpage` carries everything the agent works by: a short `SKILL.md`, the manual of the Cleverpage API and the building guide for components, each as of the API version named in it. The agent takes no instructions from a server. Once the API is ahead of that copy, the agent learns so when it connects and tells you; you update the plugin under `/plugin`.
+
+That plugin makes no images, videos or audio with AI, and its manual names no tool for it. The agent works with the files you give it and with your website's media library. If you want a generated image, you make it yourself in that library in Cleverpage.
 
 The single-file skill, `AGENTS.md`, `GEMINI.md` and the Cursor rule are pointers instead: they send the agent to the current manual on the server, so they never go stale.
 
 The work with Cleverpage goes to one host, `app.cleverpage.ai`:
 
-- The agent's calls to the API, signed with the key from `~/.config/cleverpage/token`. With the plugin, each call also names the version of the manual it carries.
-- To connect, the plugin's agent uses `curl` and downloads nothing. An agent that follows a pointer may instead download Cleverpage's command line from `app.cleverpage.ai/api/v1/cli` and run it: one Python file that uses only the standard library.
+- The agent's calls to the API, signed with the key from `~/.config/cleverpage/token`. With the directory's plugin, each call also names the version of the manual it carries.
+- To connect, the directory plugin's agent uses `curl` and downloads nothing. An agent that follows a pointer may instead download Cleverpage's command line from `app.cleverpage.ai/api/v1/cli` and run it: one Python file that uses only the standard library.
 - The OpenAPI schema, when the agent needs a tool's exact arguments.
 - The images, films and other files of your design, which the agent uploads to your website. Images your design names by address are fetched from where they lie.
 

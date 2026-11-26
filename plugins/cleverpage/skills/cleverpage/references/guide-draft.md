@@ -273,8 +273,8 @@ So they do not happen again:
 
 ## What you tell the agency at the end
 
-Brief. The links first (`links` in the answers: the project in the
-studio, the preview, the website after publishing), then what came
+Brief. The links first (`links` in the answers: the website in
+Cleverpage, the preview, the website after publishing), then what came
 into being, what the editor can do alone from now on, and what stays
 deliberately locked — with the reason. Every place where the result
 differs from the draft, with the reason; "the contract wants it" is

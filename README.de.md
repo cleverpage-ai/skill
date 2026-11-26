@@ -20,6 +20,12 @@ Mit Cleverpage baut der Agent die Seite in einem System, das Editor, Hosting, Fo
 
 ```
 /plugin marketplace add cleverpage-ai/skill
+/plugin install cleverpage-latest@cleverpage
+```
+
+`cleverpage-latest` liest die aktuelle Anleitung von Cleverpage, darum ist jedes neue Werkzeug ab dem Tag da, an dem es erscheint. Im Marketplace liegt außerdem `cleverpage`, die Fassung für das Plugin-Verzeichnis von Anthropic: Sie bringt eine Kopie der Anleitung mit, erzeugt nichts mit KI und wird erst nach einer Prüfung aktualisiert. Installiere eines der beiden:
+
+```
 /plugin install cleverpage@cleverpage
 ```
 
@@ -62,7 +68,7 @@ Bau mit Cleverpage eine Website für eine Physiotherapiepraxis.
 
 Was dann passiert:
 
-1. Der Agent liest die Anleitung. Das Plugin bringt sie mit; die anderen Formen lesen die aktuelle von Cleverpage.
+1. Der Agent liest die Anleitung: die aktuelle von Cleverpage, oder mit dem Verzeichnis-Plugin `cleverpage` die Kopie, die es mitbringt.
 2. Dein Browser öffnet sich. Du meldest dich an oder legst ein kostenloses Konto an und klickst auf „Verbinden". Kein Passwort, kein API-Schlüssel im Chat.
 3. Der Agent fragt, was du mitbringst: ein Design, Screenshots, eine bestehende Website, eine Idee oder nichts.
 4. Er baut Designsystem, Komponenten und Seiten. Den Fortschritt siehst du live in deinem Cleverpage-Konto.
@@ -95,20 +101,22 @@ Der Agent spricht mit einer normalen HTTP-API. Es gibt kein Paket zu installiere
 - Der Zugangsschlüssel landet direkt in `~/.config/cleverpage/token`. Im Chat taucht er nie auf.
 - Schlüssel laufen nach 90 Tagen ab und lassen sich in deinem Konto widerrufen.
 - Freigeben auf Staging und Live schalten sind getrennte Schritte. Live geht nur mit deinem ausdrücklichen Ja.
-- Mit dem Skill als einzelne Datei und den anderen Zeigern darf die KI Credits für erzeugte Bilder oder Videos nur ausgeben, wenn du das beim Verbinden erlaubst, mit einer Monatsgrenze. Das Claude-Code-Plugin erzeugt keine.
+- Mit `cleverpage-latest`, dem Skill als einzelne Datei und den anderen Zeigern darf die KI Credits für erzeugte Bilder oder Videos nur ausgeben, wenn du das beim Verbinden erlaubst, mit einer Monatsgrenze. Das Verzeichnis-Plugin `cleverpage` erzeugt keine.
 
-## Was das Plugin enthält und was der Agent abruft
+## Was die Plugins enthalten und was der Agent abruft
 
-Das Claude-Code-Plugin bringt alles mit, wonach der Agent arbeitet: eine kurze `SKILL.md`, die Anleitung der Cleverpage-API und den Bauleitfaden für Komponenten, jeweils auf dem Stand der API-Version, die darin steht. Der Agent holt sich keine Anweisungen von einem Server. Ist die API weiter als diese Kopie, erfährt der Agent das beim Verbinden und sagt es dir; du aktualisierst das Plugin unter `/plugin`.
+`cleverpage-latest` enthält eine kurze `SKILL.md` mit denselben Schritten wie der Skill als einzelne Datei: Der Agent liest die aktuelle Anleitung auf dem Server und arbeitet danach.
 
-Das Plugin erzeugt keine Bilder, Videos oder Audiodateien mit KI, und seine Anleitung nennt kein Werkzeug dafür. Der Agent arbeitet mit den Dateien, die du ihm gibst, und mit der Medienbibliothek deiner Website. Ein erzeugtes Bild machst du selbst in dieser Bibliothek in Cleverpage.
+Das Verzeichnis-Plugin `cleverpage` bringt alles mit, wonach der Agent arbeitet: eine kurze `SKILL.md`, die Anleitung der Cleverpage-API und den Bauleitfaden für Komponenten, jeweils auf dem Stand der API-Version, die darin steht. Der Agent holt sich keine Anweisungen von einem Server. Ist die API weiter als diese Kopie, erfährt der Agent das beim Verbinden und sagt es dir; du aktualisierst das Plugin unter `/plugin`.
+
+Dieses Plugin erzeugt keine Bilder, Videos oder Audiodateien mit KI, und seine Anleitung nennt kein Werkzeug dafür. Der Agent arbeitet mit den Dateien, die du ihm gibst, und mit der Medienbibliothek deiner Website. Ein erzeugtes Bild machst du selbst in dieser Bibliothek in Cleverpage.
 
 Der Skill als einzelne Datei, `AGENTS.md`, `GEMINI.md` und die Cursor-Regel sind dagegen Zeiger: Sie schicken den Agenten zur aktuellen Anleitung auf dem Server und veralten deshalb nie.
 
 Die Arbeit mit Cleverpage läuft über einen einzigen Host, `app.cleverpage.ai`:
 
-- Die Aufrufe des Agenten an die API, signiert mit dem Schlüssel aus `~/.config/cleverpage/token`. Mit dem Plugin nennt jeder Aufruf zusätzlich die Version der Anleitung, die es mitbringt.
-- Zum Verbinden nutzt der Agent des Plugins `curl` und lädt nichts herunter. Ein Agent, der einem Zeiger folgt, kann stattdessen die Kommandozeile von Cleverpage unter `app.cleverpage.ai/api/v1/cli` laden und ausführen: eine einzelne Python-Datei, die nur die Standardbibliothek nutzt.
+- Die Aufrufe des Agenten an die API, signiert mit dem Schlüssel aus `~/.config/cleverpage/token`. Mit dem Verzeichnis-Plugin nennt jeder Aufruf zusätzlich die Version der Anleitung, die es mitbringt.
+- Zum Verbinden nutzt der Agent des Verzeichnis-Plugins `curl` und lädt nichts herunter. Ein Agent, der einem Zeiger folgt, kann stattdessen die Kommandozeile von Cleverpage unter `app.cleverpage.ai/api/v1/cli` laden und ausführen: eine einzelne Python-Datei, die nur die Standardbibliothek nutzt.
 - Das OpenAPI-Schema, wenn der Agent die genauen Argumente eines Werkzeugs braucht.
 - Die Bilder, Filme und weiteren Dateien deines Designs, die der Agent in deine Website hochlädt. Bilder, die dein Design als Adresse nennt, holt er dort ab, wo sie liegen.
 

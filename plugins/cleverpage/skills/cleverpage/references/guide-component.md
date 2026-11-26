@@ -200,11 +200,11 @@ missing, the logic belongs in an island.
 | Prop keys: English, `lower_with_underscores` (a-z, 0-9, _) | Keys are technical names like HTML attributes — what's visible is `label`/`description` |
 | Every prop: `type`, `label`, `description`, `default`, `role` | Without the contract there is no editor UI and no validation — and without `description` the prompt processing cannot tell which prop is meant |
 | The `default` is a value of the prop's type: `3`, not `"3"`; `false`, not `"false"`; a select's default is one of its option values; a collection's is its id or `""` | Every page that leaves the prop alone shows the default — the gate checks it like page content (`prop-default-invalid`) |
-| `type` only from the catalog: `text`, `richtext`, `number`, `boolean`, `select`, `date`, `image`, `file`, `video`, `icon`, `link`, `collection`, `form`, `group`, `list`, `slot` | The catalog is closed — every interface and every renderer understands every prop |
+| `type` only from the catalog: `text`, `richtext`, `number`, `boolean`, `select`, `date`, `image`, `file`, `video`, `audio`, `icon`, `link`, `collection`, `form`, `group`, `list`, `slot` | The catalog is closed — every interface and every renderer understands every prop |
 | `text` carries **bold** and *italic* by itself: `**…**`, `*…*` | The core renders the marks wherever a text prop stands as text, and leaves the bare words in an attribute or a title. Output it as `{{ title }}`, never through `\| markdown`, and never split one sentence into several props only to emphasize a word |
 | `richtext` in the template always via `{{ text \| markdown }}` | The editor's Markdown (paragraphs, `##`/`###`, `-`/`1.` lists, `**bold**`, `*italic*`, `` `code` ``, `[text](target)`, and a table as a block of lines that each begin with `\|`: the header row, `\| --- \| --- \|` under it, then the rows; a cell holds one line and its marks) becomes HTML — without the filter, visitors would see asterisks. HTML in the value is escaped; `\| markdown` belongs ONLY on richtext |
 | References as a `link` prop, and `{{ target \| link }}` in the template | Internal targets point at page IDs and survive every rename |
-| Media: `{{ picture \| image }}` is the whole `<img>` with its sizes, loading lazily, and with the focal point the editors set as its `object-position`, so a frame that crops the picture with `object-fit: cover` keeps what matters in view at every width; `{{ logo \| image: "eager" }}` loads at once, for a picture visible without scrolling outside the content (a logo in the header; the content's first picture is made eager by the build), and a ratio goes beside it (`image: "3:2", "eager"`); `{{ picture \| image_source }}` the bare address, without the focal point, so a picture a frame crops takes `image`; `{{ clip \| video }}` a player that streams the film in the size the visitor's line carries (only its still loads before Play), `{{ clip \| video: "loop" }}` the same film playing by itself, muted, in a loop and without controls, for a background or a short clip that shows something: it starts once it is laid out and in view (not in a closed tab, not below the fold), sharp from its first picture, and rests when it is not; an island may drive that `<video>` with `play()`, `pause()`, `currentTime` and `loop`, and a clip it plays starts wherever it is; `{{ clip \| video_source }}` the bare address of its 720p MP4, for a player of your own, which is never as sharp as the upload: where sharpness counts, take the loop and drive it; `{{ clip \| video_chapters }}` the film's chapters as a list of buttons (see "A film's chapters"), `""` without any; `{{ doc \| file_name }}` and `{{ doc \| file_size }}` name a download ("price-list.pdf", "121 KB") and give `""` when nothing is chosen | The library hands out ids; the filters turn them into what the page needs |
+| Media: `{{ picture \| image }}` is the whole `<img>` with its sizes, loading lazily, and with the focal point the editors set as its `object-position`, so a frame that crops the picture with `object-fit: cover` keeps what matters in view at every width; `{{ logo \| image: "eager" }}` loads at once, for a picture visible without scrolling outside the content (a logo in the header; the content's first picture is made eager by the build), and a ratio goes beside it (`image: "3:2", "eager"`); `{{ picture \| image_source }}` the bare address, without the focal point, so a picture a frame crops takes `image`; `{{ clip \| video }}` a player that streams the film in the size the visitor's line carries (only its still loads before Play), `{{ clip \| video: "loop" }}` the same film playing by itself, muted, in a loop and without controls, for a background or a short clip that shows something: it starts once it is laid out and in view (not in a closed tab, not below the fold), sharp from its first picture, and rests when it is not; an island may drive that `<video>` with `play()`, `pause()`, `currentTime` and `loop`, and a clip it plays starts wherever it is; `{{ clip \| video_source }}` the bare address of its 720p MP4, for a player of your own, which is never as sharp as the upload: where sharpness counts, take the loop and drive it; `{{ clip \| video_chapters }}` the film's chapters as a list of buttons (see "A film's chapters"), `""` without any; `{{ clip \| video_transcript }}` the film's words to read, from its captions (see "Captions and transcript"); `{{ sound \| audio }}` a sound of the library as the browser's own player (`<audio controls>`, named by the sound's title), and `{{ sound \| file }}` its address to download; `{{ doc \| file_name }}` and `{{ doc \| file_size }}` name a download ("price-list.pdf", "121 KB") and give `""` when nothing is chosen | The library hands out ids; the filters turn them into what the page needs |
 | A legal text the website receives from its provider (IT-Recht Kanzlei, eRecht24; the person connects it under Settings › Legal texts): a `select` prop `kind` with the options `terms`, `privacy`, `imprint`, `withdrawal`, `privacy_social_media`, and `{{ kind \| legal_text }}` in the template, so one component serves every legal page. It renders the text in the page's language as checked HTML inside `<div class="cleverpage-legal-text">` (headings, paragraphs, lists, tables, links), `""` while none was received | The provider keeps the text current and an update reaches the page by itself; a text copied into a prop goes stale the day the provider changes it. Style it through the class, never through the text |
 | `{{ when \| date }}` reads an ISO date (`2027-03-14`, a time after it is fine) in the site's language: "14. März 2027", "14 March 2027"; anything else stays as it is | Dates are stored in one form and shown in the reader's |
 | `link` values: `{type: "page", page: "s-…"}` (page ID, not name or path), `{type: "external", url}`, `mail`/`address`, `phone`/`number`, `file`/`path`, `anchor`/`name`, optional `anchor` with `page`. An address is `https://…`, `mailto:`, `tel:`, a path or `#anchor` | The key per type is fixed — page IDs come from `list_pages`. `javascript:`, `data:` and the like are refused: they would run in the visitor's browser |
@@ -223,6 +223,7 @@ refuses what the core could not build.
 | `icon` | `"lucide:check"` — always with its set, never `"check"` |
 | `image`, `file` | a media id `"m-…"`, or `{media: "m-…", alt}`; `""` is nothing chosen |
 | `video` | a video of the library, `"m-…"` or `{media: "m-…"}`; or an embed, `{provider: "youtube" \| "vimeo", id}`; `""` is nothing chosen. The media id must be a video |
+| `audio` | a sound of the library (a recording, music, an audio file), `"m-…"` or `{media: "m-…"}`; `""` is nothing chosen |
 | `collection` | its id `"c-…"`, or `{target: "c-…", limit: 6}` (`ziel`/`grenze` are read too); it must exist in the project (`list_collections`) |
 | `form` | its id `"f-…"`; it must exist in the project (`list_forms`) |
 | `link` | see the hard rules above |
@@ -350,6 +351,51 @@ A `select` prop `chapters` with `show` and `hide` lets the editors decide
 per section; it needs no new type. The page carries the film as a
 `VideoObject` with a `Clip` per chapter on its own, so a search can show
 key moments.
+
+## Captions and transcript
+
+Captions belong to the film, as its chapters do: one track per language
+of the website, kept in the media library (`POST /media/<film>/captions`
+with `file`, WebVTT or SRT, `language` and `kind`: `captions` with
+speakers and sounds for people who do not hear, `subtitles` translation
+only). `{{ clip | video }}` carries them as `<track>`s, the page's
+language first and none shown until a visitor turns them on in the
+player; the choice holds for the next film and page in that browser.
+They show on a dark ground over the picture.
+
+`{{ clip | video_transcript }}` writes the words of the page's language
+to read (WCAG 1.2.1), `""` without captions in it: a paragraph per
+speaker or pause, each starting with a button at its time that makes the
+film seek there, as the chapters do. Style `.cleverpage-transcript`, its
+`p`, `button` and `b` (the speaker). Under the film, behind a
+`<details>` the editors switch with a `select`:
+
+```liquid
+{% if transcript == "show" %}<details class="film__words"><summary>{{ transcript_label }}</summary>{{ clip | video_transcript }}</details>{% endif %}
+```
+
+The player is the browser's own: every control (play, pause, timeline,
+volume, captions, speed, full screen) works with the keyboard and is
+named by the browser for a screen reader, in the visitor's browser
+language. Nothing plays with sound by itself. A film in a loop
+(`video: "loop"`) gets a round button over its lower right corner that
+pauses and plays it (WCAG 2.2.2), and stands still on its still where
+the visitor asked for reduced motion.
+
+Captions can also be drafted from the film's sound (speakers told
+apart, sounds in brackets, the website's word list applied) and
+translated; a draft shows on the website only once a person checked and
+approved it.
+
+An audio description (WCAG 1.2.3, 1.2.5) is the film's sound with spoken
+descriptions of what is only seen, one per language, uploaded or made
+from timed sentences. `{{ clip | video }}` then shows a switch "AD" over
+the film's upper right corner, which swaps to the described sound at the
+same moment and is remembered; the sentences stand in the transcript as
+`[Image: …]`. Nothing to do in the component.
+
+An embed (YouTube, Vimeo) keeps its captions, sounds and descriptions
+with its provider; Cleverpage keeps none for it.
 
 ## Structured data
 
@@ -691,6 +737,13 @@ The draft is usually desktop only. The component must work on mobile:
 `object-position` holds where none is set). Every `<img>` needs a
 meaningful `alt` that comes from a prop; interactive elements need
 accessible names.
+
+Cleverpage puts every page's content in one main region, between the
+layout's header and footer: `<main id="main-content" tabindex="-1">`.
+A component never writes a `<main>` of its own (the gate notes it), and a
+layout whose frame wraps the content in its own `<main>` keeps it, with
+the header and footer instances outside. A header's skip link points at
+it: `<a class="skip" href="#main-content">`, hidden until it has focus.
 
 ## Checklist before submitting
 

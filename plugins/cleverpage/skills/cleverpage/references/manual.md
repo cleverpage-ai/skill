@@ -1,7 +1,7 @@
 # Cleverpage API — manual for agents
 
 This copy came with the Cleverpage plugin and describes contract
-1.20.18 of 2026-11-24. The building guide lies beside it:
+1.20.19 of 2026-11-26. The building guide lies beside it:
 `guide-draft.md` and `guide-component.md`.
 
 Cleverpage runs websites built from typed components. You build and
@@ -131,7 +131,7 @@ same command and never in the address, your product, and the contract
 this copy describes:
 
     curl -s -H "Authorization: Bearer $(cat ~/.config/cleverpage/token)" \
-        -H "X-Cleverpage-Agent: <your product>" -H "X-Cleverpage-Manual: 1.20.18" \
+        -H "X-Cleverpage-Agent: <your product>" -H "X-Cleverpage-Manual: 1.20.19" \
         https://app.cleverpage.ai/api/v1/me
 
 `/me` answers who she is, her organisations and what this token is: its
@@ -152,10 +152,10 @@ macOS, ties `path` to `PATH`: after `path=…` or `for path in …` no
 command is found any more (`curl`, `cat`, `python3`: exit 127). Call
 it `page_path` or `address`.
 
-This copy describes contract 1.20.18. Say so in every call, beside
+This copy describes contract 1.20.19. Say so in every call, beside
 your product:
 
-    -H "X-Cleverpage-Agent: <your product>" -H "X-Cleverpage-Manual: 1.20.18"
+    -H "X-Cleverpage-Agent: <your product>" -H "X-Cleverpage-Manual: 1.20.19"
 
 `/me` then answers `manual`: `yours`, `current` and `outdated`. With
 `outdated: true` the plugin has a newer version. Tell her so in one
@@ -207,13 +207,27 @@ working.
    follows the conversion (minutes for a long 4K film). Publish a page
    with the film only once it is done: until then it plays the file as it came.
    A film's sound in a further language: `POST https://app.cleverpage.ai/api/v1/projects/<project>/media/<id>/audio`
-   as multipart with `file` (WAV, M4A, MP3 or AAC, as long as the film within
-   0.5 s) and `language` (`en`); it replaces that language's sound, and
+   as multipart with `file` (WAV, M4A, MP3, AAC, OGG or FLAC, as long as the film
+   within 0.5 s), or `media` naming a sound of the library, and `language` (`en`);
+   it replaces that language's sound, and
    `DELETE …/audio/<language>` removes it. Converted as a job (`get_media_job`
    with the film's id); the picture is not converted again. `{{ x | video }}`
    then plays each page's language, the default language's sound where a
    language has none. `update_media` takes `title_languages`,
    `caption_languages` and `chapters_languages` for the same film.
+   Captions (needed for a film with sound to be accessible): `POST https://app.cleverpage.ai/api/v1/projects/<project>/media/<id>/captions`
+   as multipart with `file` (WebVTT or SRT), `language` and `kind` (`captions` with
+   speakers and sounds, `subtitles` translation only); a cue outside the film,
+   overlapping or empty is refused with its number, one too short or too fast to
+   read is taken and named in `warnings`. `DELETE …/captions/<language>` removes
+   them. An audio description: the same `…/audio` route with `kind` `description`
+   (any language of the website); the player then offers a switch "AD".
+   An embedded film (YouTube, Vimeo) keeps its captions and descriptions with its
+   provider.
+   A medium's file, for you to listen to or check: `GET …/media/<id>/file`
+   (`read_media` names it as `download`). The speech models speak many
+   languages with every voice; write the text in the language it is spoken in,
+   and listen once before you use a recording in another language than German.
 7. Pages: `submit_page` with `{"path": "/about", "title": …,
    "layout": "standard", "content": [{"component": "<name>",
    "props": {…}}]}`. An entry's `"anchor": "menu"` gives its section the
@@ -223,7 +237,7 @@ working.
    page is named after its path (`/` becomes `startseite`); the answer
    tells the name. Use that name afterwards. To change an existing page,
    `read_page` first and change only what the task needs: a person may have
-   edited it in the studio. Send the `version` it answered as `base_version`;
+   edited it in Cleverpage. Send the `version` it answered as `base_version`;
    a page saved since answers 409 with who saved what. Read again and apply
    your change to what is there now.
    The menu: `"in_menu": true` on any page adds it (once), `false` takes
@@ -240,7 +254,7 @@ working.
    Lists of entries (news, events, jobs): a collection (`submit_collection`,
    then `submit_collection_entry` per entry) and a component with a
    `collection` prop that loops over `entries | collection_entries`. The
-   studio and `links.preview` show the entries at once; staging and the
+   pages in Cleverpage and `links.preview` show the entries at once; staging and the
    website only after `publish_collection`. The entries that are there,
    the editorial team's too, with their ids: `list_collection_entries`.
    A page per entry:
@@ -264,9 +278,9 @@ working.
    her website. Going live is a step of its own: offer it, say that
    every visitor of her domain then sees the change, and only after
    her explicit yes call `go_live` with `"confirm": "<project>"`.
-   She can also put it live herself, in the studio under Publishing.
+   She can also put it live herself in Cleverpage (`links.publishing`).
 10. Hand over: `GET https://app.cleverpage.ai/api/v1/projects/<project>` answers the links. Give
-   the person `links.studio` (where she and her editors work),
+   the person `links.studio` (the website in Cleverpage, where she and her editors work),
    `links.preview` (the working state) and `links.site` (staging, or
    the website once she published it), and name `site_password` in the
    chat: it opens the working state and staging, and no link opens
@@ -315,11 +329,16 @@ books it.
    `description` take maps too, `paths: {"en": "/contact"}` gives a
    translated address. Alt texts: `update_media` with `alt_languages`.
    Collections, entries and forms: their tools say how.
-5. A page appears in a language only once all its texts and alt texts are
-   translated; until then it is left out there, and a language whose start
-   page is untranslated is not published at all. The studio's pages list
-   shows what each page lacks, and on a language's stage the editor has
-   Translate, which fills the gaps with AI from her credit.
+5. A page first appears in a language once all its texts and alt texts
+   are translated, and a language first appears once its start page is.
+   What a visitor can already reach in a language stays: a text added
+   later and not yet translated shows the default language's words there.
+   To show nothing in one language, write that language's value empty
+   (`"en": ""`); that counts as translated. Going live refuses a
+   build that would take a page off a language and says which. The
+   list of pages in Cleverpage shows what each page lacks, and on a language's
+   stage the editor has Translate, which fills the gaps with AI from her
+   credit.
 6. Publish as usual; staging and the website carry the language once the
    pages are translated.
 
@@ -330,6 +349,9 @@ sentences, and leave out the machinery: no tool names, tokens, props,
 schemas, rule ids, build numbers, file paths or HTTP codes. Every line
 she sees is in her language, the short notes before and between your
 calls too; that this manual and the answers are English is no reason.
+Where she does something herself, it is in Cleverpage: name the place
+as its navigation shows it, in her language (Content, Pages; Data,
+Videos; Settings), and give the link when an answer has one.
 
 - **While you work:** one line when a stage begins (design system,
   sections, page, check), nothing per call. A refusal you fixed is
@@ -338,7 +360,7 @@ calls too; that this manual and the answers are English is no reason.
   one on what she does. Do not wait for a second format when the one
   you have holds the page and its media.
 - **The hand-over**, in this order and nothing else, at most fifteen
-  lines: what is built and whether it is live; the links (studio,
+  lines: what is built and whether it is live; the links (Cleverpage,
   preview, website); each difference from the design with its reason,
   one line each; what she still has to provide or decide. Lists of
   components, tokens or calls only when she asks.
@@ -418,13 +440,13 @@ tools also answer GET. The exact schemas stand in
 - **submit_layout** · POST · scope build · required: none  
   Set a layout — the frame around every page that uses it. Header and footer go in with content: ONE list of component instances like page content, with exactly one {"slot": true} entry where each page's content goes ([{"component": "site-header", "props": {…}}, {"slot": true}, {"component": "site-footer", "props": {…}}]); list_layouts answers in the same shape. The instances render once per page, stay editable with props and may carry islands. Liquid source goes in with part and source instead: part="page" is ONE template with a {% content %} slot (it can WRAP the content), part="header"/"footer" the older split form, part="base" the base CSS of the whole site. Source layouts have no props. A project may have several layouts: without a name you write the "standard" layout, which applies to every page that does not pick one; with a name you write that layout, and a page joins it through its "layout" field (submit_page). list_layouts shows which pages use what.
 - **submit_page** · POST · scope build · required: content  
-  Create a page or set its content. content is the list of entries: [{"component": "name", "props": {…}}] — a form sits on the page the same way, as {"form": "f-…"}. Per entry, optional spacing_top/spacing_bottom: a factor of the default section gap --spacing-section (0, 0.25, 0.5, 0.75, 1.25, 1.5, 1.75, 2 — 1 = default = omit) or a length like '48px'. The texts and images of the page belong in each entry's props; a prop the entry leaves out is filled from the component's default. A NEW page requires path and gets a stable ID. in_menu true adds a page to the menu, new or not, false takes it out; menu_text names its item. A new path on an existing page is a move — the old path redirects automatically. Validated automatically, but writes only the DRAFT version — the page only reaches the website via publish([...]). Feel free to submit repeatedly and publish only once the page is finished. To change an EXISTING page, read_page first, change only what the task needs and send its version as base_version: a person may have edited the page in the studio, and a submission from an older copy brings back what they removed. A page saved since answers 409 with who saved what.
+  Create a page or set its content. content is the list of entries: [{"component": "name", "props": {…}}] — a form sits on the page the same way, as {"form": "f-…"}. Per entry, optional spacing_top/spacing_bottom: a factor of the default section gap --spacing-section (0, 0.25, 0.5, 0.75, 1.25, 1.5, 1.75, 2 — 1 = default = omit) or a length like '48px'. The texts and images of the page belong in each entry's props; a prop the entry leaves out is filled from the component's default. A NEW page requires path and gets a stable ID. in_menu true adds a page to the menu, new or not, false takes it out; menu_text names its item. A new path on an existing page is a move — the old path redirects automatically. Validated automatically, but writes only the DRAFT version — the page only reaches the website via publish([...]). Feel free to submit repeatedly and publish only once the page is finished. To change an EXISTING page, read_page first, change only what the task needs and send its version as base_version: a person may have edited the page in Cleverpage, and a submission from an older copy brings back what they removed. A page saved since answers 409 with who saved what.
 - **publish** · POST · scope operate · required: none · confirm required  
   Approve finished pages onto staging (the website's preview address, behind its password). Only approved pages are part of the website. Going live is a separate step under the website's own connected domain: `go_live`, only after the person's explicit yes, or her own click under Publishing. Call once at the end of the work, with all finished pages at once, and with frame=true when you changed the layout (header, footer) or the design system.
 - **submit_collection_entry** · POST · scope build · required: collection, values  
   Create a collection entry (without id) or replace one (with id) — the path for existing data during setup: submit a hundred entries, then call publish_collection ONCE. Values are validated against the entry schema. A field with localizable: true holds a language map {"_languages": {"de": "…", "en": "…"}} (project languages, the default always present); the entry's page appears in a further language once every translated field carries it, at slug_languages.
 - **publish_collection** · POST · scope operate · required: collection · confirm required  
-  Content release of a collection: the visible entries are frozen as an immutable package and go live — without a build. Rolling back is just a pointer. Until then the studio and the preview show the entries, staging and the website do not.
+  Content release of a collection: the visible entries are frozen as an immutable package and go live — without a build. Rolling back is just a pointer. Until then Cleverpage and the preview show the entries, staging and the website do not.
 - **submit_form** · POST · scope build · required: definition  
   Create or replace a form (field definitions, target, spam protection, consent text). Field types: text, textarea, email, phone, number, date, select, checkbox, rating, file, content, divider. Field keys: name, label, type, required?, placeholder? (a select without a default shows it as its empty first choice), options?, width? (full|half), default?, error_text?, pattern? (letters|postcode|url), regex?, min/max?, visible_if? {field, is: equals|not_equals|contains, value}, step?. Form keys: name, fields, consent? (may link: [Datenschutz](/datenschutz)), target? {mail: [addresses], webhook: {url}, notify?: 'notice', receipt?: true}, receipt: true mails the sender a confirmation of receipt (no content of the message) to the address in the form's email field; it needs one. message?, redirect?, window? {from?, to?}, retention? ('90'|'180'|'365'|'0'), spam_check?, steps?, access?, origins?, allow_localhost?, id (only when replacing). Availability (access): “public” anyone may submit · “restricted” own site, the origins listed in origins (a leading * covers subdomains) and localhost · “private” only with the project key in the X-API-Key header — a private form must not be placed on a page. Own markup: GET <action>/definition returns the fields plus “revision”. Send that value back in the field named by “revision_field” (_fassung) — then a submission is validated against the questions your form actually shows and is filed under that revision, even if the editors renamed an option in the meantime. Without it, the current definition applies. Place it on a page like a component (submit_page entry {"form": "f-…"}), or build your own markup: in the template, form | form_fields yields the field list and form | form_action the submit address. A form that carries a component belongs to it: its questions come from that component's inbox and stay as they are — change them by rebuilding the component. Its name follows the component's displayName (rename the component to rename it). Everything else (target, retention, access, spam check) is yours to set. Spam protection: an invisible honeypot field and the origin check (access) are always on. spam_check: true adds a small sum (“4 + 7”) the visitor solves before sending, checked on the server, good for one submission, without a third party or a cookie. Nothing reads what a submission says. Leave it off until spam arrives: it costs every visitor a step. On a multilingual website the texts stay in the default language where they are, and translations? holds each further language's words: {"en": {fields: {<field name>: {label?, placeholder?, error_text?, options?: [one text per option]}}, texts?: [content blocks in order], steps?, message?, consent?, submit_label?, next_label?, back_label?}}. A word left out reads in the default language; an option sends its default value in every language. A form on /en/ reads English, and its thanks and refusals answer in it.
 - **submit_block** · POST · scope build · required: block  
@@ -442,7 +464,7 @@ tools also answer GET. The exact schemas stand in
 - **submit_types** · POST · scope build · required: types  
   Define or replace project-wide types. Each type is {label, description, props} with the same prop contract as a component (type, label, description, default). Components then declare {type: list|group, of: <name>} instead of own props.
 - **list_media** · GET or POST · scope read · required: none  
-  The media library of the project (images, films and documents with ID, name, alt text, dimensions; a film with its length in seconds and its chapters). image props declare aspect_ratio ('3:2' or 'frei') and min_width; values reference by media id.
+  The media library of the project (images, films, sounds and documents with ID, name, alt text, dimensions; a film with its length in seconds and its chapters, a sound with its length and format). image props declare aspect_ratio ('3:2' or 'frei') and min_width; values reference by media id.
 - **upload_media** · POST · scope build · required: filename, data  
   Deprecated in the API: send files as multipart to POST /api/v1/projects/<project>/media; the bytes go from the disk to the server and never through your context. This tool takes base64 for clients that can only send JSON.
 - **read_site** · GET or POST · scope read · required: none  
@@ -486,7 +508,7 @@ tools also answer GET. The exact schemas stand in
 - **resolve_comment** · POST · scope build · required: page, comment  
   Mark a comment as resolved (comment: its id from read_comments).
 - **go_live** · POST · scope operate · required: none · confirm required  
-  Put the website live: what staging shows goes to the website's own domain, for every visitor. A separate step after `publish`, which only approves onto staging. Call it only after the person said yes to going live in this conversation, having been told that visitors of her domain then see the change. Needs the right to publish and a connected domain. Search engines hear of it by themselves: sitemap.xml dates every page with its last change (lastmod), and the addresses that changed are reported once to IndexNow (Bing, Yandex and others), unless the website or the page is kept out of search engines.
+  Put the website live: what staging shows goes to the website's own domain, for every visitor. A separate step after `publish`, which only approves onto staging. Call it only after the person said yes to going live in this conversation, having been told that visitors of her domain then see the change. Needs the right to publish and a connected domain. Search engines hear of it by themselves: sitemap.xml dates every page with its last change (lastmod), and the addresses that changed are reported once to IndexNow (Bing, Yandex and others), unless the website or the page is kept out of search engines. A build that would take pages off the website in a language it has is refused with `language_losses`: tell the person which pages leave which language, and only after her yes call go_live again with `drop_languages: true`.
 - **rollback_live** · POST · scope operate · required: build · confirm required  
   Roll the live site back to an earlier build (build from list_builds). Owners only. The addresses it changes are reported to search engines as after go_live.
 - **set_languages** · POST · scope build · required: none  
@@ -500,7 +522,7 @@ tools also answer GET. The exact schemas stand in
 - **read_privacy_facts** · GET or POST · scope read · required: none  
   What the imprint and the privacy notice need from Cleverpage's side, for this website: who runs it and where it is hosted, delivery on the own domain, server logs, cookies, fonts, the visitor count (with its ready German paragraph), the forms and what happens to their entries, video embeds — and the short list of what only the owner can say. Read it before writing either page.
 - **read_page** · GET or POST · scope read · required: name  
-  Read one page: id, path, title, description, layout and the content entries, in the form submit_page takes back (`hidden` true: the page is kept out of search engines), with its `version` and `last_change` (who saved it; `source` "editor" for a person in the studio, `via` the agent of an API write). Send that version as base_version with submit_page. With `version` it reads an earlier version's content. list_pages shows the names.
+  Read one page: id, path, title, description, layout and the content entries, in the form submit_page takes back (`hidden` true: the page is kept out of search engines), with its `version` and `last_change` (who saved it; `source` "editor" for a person in Cleverpage, `via` the agent of an API write). Send that version as base_version with submit_page. With `version` it reads an earlier version's content. list_pages shows the names.
 - **delete_page** · POST · scope operate · required: name · confirm required  
   Delete a page. Its old address redirects to the start page, the menu entry goes with it, and its released version is removed; the website changes with the next publish.
 - **add_redirect** · POST · scope build · required: page, alias  
@@ -514,7 +536,7 @@ tools also answer GET. The exact schemas stand in
 - **delete_submission** · POST · scope operate · required: form, number · confirm required  
   Delete one submission for good, with its attachments. This is the GDPR deletion; it cannot be undone.
 - **read_media** · GET or POST · scope read · required: id  
-  One media item: kind, names, alt text, caption, folder; for a film also its length in seconds and its chapters.
+  One media item: kind, names, alt text, caption, folder; for a film also its length in seconds, the size visitors see at most (width, height; `mp4` is the 720p file beside the stream, `source` the upload), its chapters, its captions and drafts per language, its audio `descriptions` (each with `watch` and `download`), `watch` (the film for a person signed in to Cleverpage; `#t=<seconds>` starts it there) and `app_url` (the film in Cleverpage, under Videos); for a sound (a recording, music) its length in seconds and its format. `download` is where this access fetches the file (GET with the token), e.g. to listen to a recording.
 - **update_media** · POST · scope build · required: id  
   Change a media item's title, alt text, caption, file name, focus point (0–1 each) or folder, or a film's chapters. `alt` is the default language's; `alt_languages` ({"en": "…"}) is the alt text in the website's further languages, merged, an empty text removing one. Only the fields you pass change; the website takes them with the next publish. Chapters replace the film's list as a whole: [{start, title}] with start in seconds or as "m:ss", the first at 0, each within the film, no start twice; [] removes them. Components show them with `{{ clip | video_chapters }}`. `title_languages`, `caption_languages` ({"en": "…"}) work like `alt_languages`; `chapters_languages` ({"en": [{start, title}]}) sets a film's chapters per further language, each list checked like `chapters`, [] removing one; a page in a language without its own shows the default language's. A film's sound in a further language goes in with POST /api/v1/projects/<project>/media/<id>/audio.
 - **delete_media** · POST · scope operate · required: id · confirm required  
@@ -530,7 +552,7 @@ tools also answer GET. The exact schemas stand in
 - **delete_collection** · POST · scope operate · required: collection · confirm required  
   Delete a collection with all its entries. The website changes with the next content release.
 - **list_collection_entries** · GET or POST · scope read · required: collection  
-  The entries of one collection as they stand in the draft, in the collection's order: id, slug, visible, visible_from, order, changed and the values, in the form submit_collection_entry takes back. Entries the editorial team wrote in the studio are here too. Read it before you replace, hide, delete or order entries you did not submit in this session: to hide one, send its values again with its id and visible false. At most `limit` entries per call (100 when omitted, 500 at most), from `offset` on; `total` says how many there are and `next_offset` where to read on.
+  The entries of one collection as they stand in the draft, in the collection's order: id, slug, visible, visible_from, order, changed and the values, in the form submit_collection_entry takes back. Entries the editorial team wrote in Cleverpage are here too. Read it before you replace, hide, delete or order entries you did not submit in this session: to hide one, send its values again with its id and visible false. At most `limit` entries per call (100 when omitted, 500 at most), from `offset` on; `total` says how many there are and `next_offset` where to read on.
 - **delete_collection_entry** · POST · scope operate · required: collection, id · confirm required  
   Remove one entry from a collection's draft (its id from list_collection_entries); live changes with the next publish_collection.
 - **order_collection** · POST · scope build · required: collection, order  

@@ -13,6 +13,14 @@
       "homepage": "https://www.cleverpage.ai",
       "license": "MIT",
       "keywords": ["website", "cms", "hosting", "editor", "publish", "domain", "forms", "client"]
+    },
+    {
+      "name": "cleverpage-latest",
+      "source": "./plugins/cleverpage-latest",
+      "description": "Put a website built with Claude online and hand it to your client. Cleverpage hosts it under its own domain, handles the forms and gives your client an editor for texts and images. Claude builds the website there or translates an existing draft into it. Reads the current manual from Cleverpage, so every new tool is there the day it ships, AI images, films, speech and captions included.",
+      "homepage": "https://www.cleverpage.ai",
+      "license": "MIT",
+      "keywords": ["website", "cms", "hosting", "editor", "publish", "domain", "forms", "client"]
     }
   ]
 }
