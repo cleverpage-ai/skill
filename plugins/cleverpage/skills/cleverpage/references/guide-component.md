@@ -307,7 +307,7 @@ them, `""` for a film without chapters:
 
 ```html
 <ol class="cleverpage-chapters" data-cleverpage-chapters="m-…" aria-label="Kapitel">
-  <li><button type="button" data-cleverpage-start="64" aria-label="1 Minute 4 Sekunden: Entwurf">
+  <li><button type="button" data-cleverpage-start="64">
     <time datetime="PT1M4S">1:04</time> <span>Entwurf</span></button></li>
   …
 </ol>
@@ -359,8 +359,10 @@ of the website, kept in the media library (`POST /media/<film>/captions`
 with `file`, WebVTT or SRT, `language` and `kind`: `captions` with
 speakers and sounds for people who do not hear, `subtitles` translation
 only). `{{ clip | video }}` carries them as `<track>`s, the page's
-language first and none shown until a visitor turns them on in the
-player; the choice holds for the next film and page in that browser.
+language first and none shown until a visitor turns them on, with the
+switch "CC" ("UT" on a German page) over the film's upper right corner
+or in the browser's own menu; with several languages the switch opens a
+short list. The choice holds for the next film and page in that browser.
 They show on a dark ground over the picture.
 
 `{{ clip | video_transcript }}` writes the words of the page's language
@@ -389,10 +391,13 @@ approved it.
 
 An audio description (WCAG 1.2.3, 1.2.5) is the film's sound with spoken
 descriptions of what is only seen, one per language, uploaded or made
-from timed sentences. `{{ clip | video }}` then shows a switch "AD" over
-the film's upper right corner, which swaps to the described sound at the
-same moment and is remembered; the sentences stand in the transcript as
-`[Image: …]`. Nothing to do in the component.
+from timed sentences. `{{ clip | video }}` then shows a switch "AD" beside
+"CC", which swaps to the described sound at the same moment and is
+remembered; a switch that is on carries a check, and both step back while
+the film plays, as the browser's controls do. A sentence marked extended
+stops the film while the description is on, is spoken, and the film goes
+on: for what matters and fits no pause, sparingly. The sentences stand in
+the transcript as `[Image: …]`. Nothing to do in the component.
 
 An embed (YouTube, Vimeo) keeps its captions, sounds and descriptions
 with its provider; Cleverpage keeps none for it.
@@ -523,10 +528,14 @@ next to the component — do not put them, a redirect or a spam check in
 the schema; the gate says so. `keep` is not yours either: whether entries are stored is a
 question a person answers in the interface.
 
-Spam protection needs nothing from the component. The honeypot and the
-origin check are always on; the system adds neither an arithmetic
-question nor a consent box to a component's form. Nothing reads what a
-submission says.
+Spam protection needs nothing from the component. The system adds a
+honeypot and a small puzzle the browser solves in the background, checks
+the origin and judges each submission; a suspicious one is kept under
+Spam without a notification, and in doubt the system asks the visitor
+to confirm in a dialog of its own, above the page, in the form's colours.
+It adds no consent box to a component's form. A website's owner can add
+Cloudflare Turnstile for a form in Cleverpage; the component
+changes nothing for it.
 
 The system sends the form itself and keeps the visitor on the page. An
 island that wants to send it — to shape a value first, or to show its
@@ -534,8 +543,10 @@ own thanks — calls `preventDefault()` in its `submit` listener; the
 system's sender then stands aside, and one submission makes one entry.
 The hidden fields stay in the form, so `new FormData(form)` carries
 them. Post that to the form's `action` through `dienste.holen` with
-`Accept: application/json`; the answer is `{ok, message}` or
-`{ok: false, errors: [...]}`.
+`Accept: application/json`; the answer is `{ok, message}`, and a refusal
+throws. When the system wants the visitor to confirm first, `holen`
+shows its check and sends again by itself: the answer you get is the
+final one, so the island needs nothing for it.
 
 **The other way — an existing form.** A prop of type `form`, the
 address from `{{ prop | form_action }}` and the field list from

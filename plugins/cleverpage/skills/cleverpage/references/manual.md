@@ -1,7 +1,7 @@
 # Cleverpage API — manual for agents
 
 This copy came with the Cleverpage plugin and describes contract
-1.20.19 of 2026-11-26. The building guide lies beside it:
+1.20.22 of 2026-11-27. The building guide lies beside it:
 `guide-draft.md` and `guide-component.md`.
 
 Cleverpage runs websites built from typed components. You build and
@@ -131,7 +131,7 @@ same command and never in the address, your product, and the contract
 this copy describes:
 
     curl -s -H "Authorization: Bearer $(cat ~/.config/cleverpage/token)" \
-        -H "X-Cleverpage-Agent: <your product>" -H "X-Cleverpage-Manual: 1.20.19" \
+        -H "X-Cleverpage-Agent: <your product>" -H "X-Cleverpage-Manual: 1.20.22" \
         https://app.cleverpage.ai/api/v1/me
 
 `/me` answers who she is, her organisations and what this token is: its
@@ -152,10 +152,10 @@ macOS, ties `path` to `PATH`: after `path=…` or `for path in …` no
 command is found any more (`curl`, `cat`, `python3`: exit 127). Call
 it `page_path` or `address`.
 
-This copy describes contract 1.20.19. Say so in every call, beside
+This copy describes contract 1.20.22. Say so in every call, beside
 your product:
 
-    -H "X-Cleverpage-Agent: <your product>" -H "X-Cleverpage-Manual: 1.20.19"
+    -H "X-Cleverpage-Agent: <your product>" -H "X-Cleverpage-Manual: 1.20.22"
 
 `/me` then answers `manual`: `yours`, `current` and `outdated`. With
 `outdated: true` the plugin has a newer version. Tell her so in one
@@ -171,7 +171,9 @@ working.
    `{"display_name": "…"}` makes a new one as a draft, with several
    organisations `{"display_name": "…", "organization": "<name>"}`.
    The website is German unless you name the language it is written in:
-   `"language": "en"` (an ISO code).
+   `"language": "en"` (an ISO code). For a new website write its short
+   description for AI assistants yourself, once you know what it is for
+   (`update_settings` with `{"llms": {"summary": "…"}}`, see "For AI assistants").
    In every address and in `confirm`, `<project>` is a project's `project`
    from that list; its `name` is what she calls the website.
 3. Read `guide-draft.md` beside this file when you translate a design,
@@ -400,6 +402,45 @@ Scopes: `read` (lists, reads, render), `build` (every submit,
 uploads, create project), `operate` (publish, go live, revert, roll back,
 maintenance). A token never carries more than the person's role.
 
+## For AI assistants
+
+Every publication gives the live website `/llms.txt`, a table of contents
+for AI assistants (llmstxt.org), and a Markdown version of every page at
+its address with `.md` (`/prices.md`, `/index.md` for `/`, `/en/index.md`
+for `/en/`), read off the built page without header, footer, navigation
+and forms. Staging and the preview have neither. Pages kept out of search
+engines are left out, and so are the ones the settings exclude.
+`update_settings` with `llms` sets it: `enabled` (on unless switched off),
+`summary` (one or two sentences on what the website is and for whom; the
+start page's description when empty), `links` (own entries listed first,
+`[{"title", "url", "description"}]`, at most 20) and `exclude` (page
+names). Each list you pass replaces the old one. A page's title and
+description in the file are its own, so a page with a clear description
+reads well there too.
+
+## Comments
+
+Whoever works on a website says on a page what should change: a
+comment. `GET https://app.cleverpage.ai/api/v1/comments` lists the open comments of every website
+you may read, oldest first within a page, each with `project`, `page`,
+`path`, `author`, `when`, `text` and `editor` (the page in Cleverpage);
+`?project=<name>` keeps one website. `author.group` is `user` for someone
+of the agency and `editor` for someone of the website, and `via` `agent`
+marks a note an agent wrote. Read a page's comments as a conversation:
+where your own note is the last, it waits for a person, and you leave it.
+
+For a comment that asks for a change, make the change as a draft
+(`submit_page`, or `submit_component` where the component lacks what is
+asked) and never `publish` it. Say on the page what you changed and that
+it waits for approval (`write_comment`), and leave the reviewer's comment
+open; resolve it (`resolve_comment`) once the person approved your change.
+Then tell the person what you prepared, with the `editor` links. A
+comment that asks for nothing you can do, you only name to her.
+
+She may want this done regularly, every morning for instance. Set it up
+as a scheduled task of the tool you run in, where it has one, with this
+section as what the task does.
+
 ## When something does not fit
 
 The manual says one thing and the API does another, the gate refuses
@@ -448,7 +489,7 @@ tools also answer GET. The exact schemas stand in
 - **publish_collection** · POST · scope operate · required: collection · confirm required  
   Content release of a collection: the visible entries are frozen as an immutable package and go live — without a build. Rolling back is just a pointer. Until then Cleverpage and the preview show the entries, staging and the website do not.
 - **submit_form** · POST · scope build · required: definition  
-  Create or replace a form (field definitions, target, spam protection, consent text). Field types: text, textarea, email, phone, number, date, select, checkbox, rating, file, content, divider. Field keys: name, label, type, required?, placeholder? (a select without a default shows it as its empty first choice), options?, width? (full|half), default?, error_text?, pattern? (letters|postcode|url), regex?, min/max?, visible_if? {field, is: equals|not_equals|contains, value}, step?. Form keys: name, fields, consent? (may link: [Datenschutz](/datenschutz)), target? {mail: [addresses], webhook: {url}, notify?: 'notice', receipt?: true}, receipt: true mails the sender a confirmation of receipt (no content of the message) to the address in the form's email field; it needs one. message?, redirect?, window? {from?, to?}, retention? ('90'|'180'|'365'|'0'), spam_check?, steps?, access?, origins?, allow_localhost?, id (only when replacing). Availability (access): “public” anyone may submit · “restricted” own site, the origins listed in origins (a leading * covers subdomains) and localhost · “private” only with the project key in the X-API-Key header — a private form must not be placed on a page. Own markup: GET <action>/definition returns the fields plus “revision”. Send that value back in the field named by “revision_field” (_fassung) — then a submission is validated against the questions your form actually shows and is filed under that revision, even if the editors renamed an option in the meantime. Without it, the current definition applies. Place it on a page like a component (submit_page entry {"form": "f-…"}), or build your own markup: in the template, form | form_fields yields the field list and form | form_action the submit address. A form that carries a component belongs to it: its questions come from that component's inbox and stay as they are — change them by rebuilding the component. Its name follows the component's displayName (rename the component to rename it). Everything else (target, retention, access, spam check) is yours to set. Spam protection: an invisible honeypot field and the origin check (access) are always on. spam_check: true adds a small sum (“4 + 7”) the visitor solves before sending, checked on the server, good for one submission, without a third party or a cookie. Nothing reads what a submission says. Leave it off until spam arrives: it costs every visitor a step. On a multilingual website the texts stay in the default language where they are, and translations? holds each further language's words: {"en": {fields: {<field name>: {label?, placeholder?, error_text?, options?: [one text per option]}}, texts?: [content blocks in order], steps?, message?, consent?, submit_label?, next_label?, back_label?}}. A word left out reads in the default language; an option sends its default value in every language. A form on /en/ reads English, and its thanks and refusals answer in it.
+  Create or replace a form (field definitions, target, spam protection, consent text). Field types: text, textarea, email, phone, number, date, select, checkbox, rating, file, content, divider. Field keys: name, label, type, required?, placeholder? (a select without a default shows it as its empty first choice), options?, width? (full|half), default?, error_text?, pattern? (letters|postcode|url), regex?, min/max?, visible_if? {field, is: equals|not_equals|contains, value}, step?. Form keys: name, fields, consent? (may link: [Datenschutz](/datenschutz)), target? {mail: [addresses], webhook: {url}, notify?: 'notice', receipt?: true}, receipt: true mails the sender a confirmation of receipt (no content of the message) to the address in the form's email field; it needs one. message?, redirect?, window? {from?, to?}, retention? ('90'|'180'|'365'|'0'), spam_check?, steps?, access?, origins?, allow_localhost?, id (only when replacing). Availability (access): “public” anyone may submit · “restricted” own site, the origins listed in origins (a leading * covers subdomains) and localhost · “private” only with the project key in the X-API-Key header — a private form must not be placed on a page. Own markup: GET <action>/definition returns the fields plus “revision”. Send that value back in the field named by “revision_field” (_fassung) — then a submission is validated against the questions your form actually shows and is filed under that revision, even if the editors renamed an option in the meantime. Without it, the current definition applies. Place it on a page like a component (submit_page entry {"form": "f-…"}), or build your own markup: in the template, form | form_fields yields the field list and form | form_action the submit address. A form that carries a component belongs to it: its questions come from that component's inbox and stay as they are — change them by rebuilding the component. Its name follows the component's displayName (rename the component to rename it). Everything else (target, retention, access, spam check) is yours to set. Spam protection is always on and needs nothing from you: an invisible honeypot field, a small puzzle the browser solves in the background, the origin check (access) and a check of each submission; a suspicious one is kept under Spam without a notification, and in doubt the visitor confirms in a dialog. The website's team can switch on Cloudflare Turnstile for a form in Cleverpage. spam_check: true adds a visible sum (“4 + 7”) the visitor solves before sending; leave it off: it costs every visitor a step. On a multilingual website the texts stay in the default language where they are, and translations? holds each further language's words: {"en": {fields: {<field name>: {label?, placeholder?, error_text?, options?: [one text per option]}}, texts?: [content blocks in order], steps?, message?, consent?, submit_label?, next_label?, back_label?}}. A word left out reads in the default language; an option sends its default value in every language. A form on /en/ reads English, and its thanks and refusals answer in it.
 - **submit_block** · POST · scope build · required: block  
   Create or replace a block: reusable page content. A block is a list of page entries — same components, same gate — maintained in ONE place and placed on many pages ({"block": "b-…"} as a page entry). It is resolved at build time, not copied: one edit reaches every page. Blocks may contain blocks (up to 5 levels); a block that contains itself is rejected.
 - **list_blocks** · GET or POST · scope read · required: none  
@@ -502,7 +543,7 @@ tools also answer GET. The exact schemas stand in
 - **search_icons** · GET or POST · scope read · required: none  
   Search the project's icons (Iconify catalogs, server-side). Without set, searches the project's base set; "set:term" targets one set. Values are always fully qualified (set:name).
 - **read_comments** · GET or POST · scope read · required: page  
-  A page's comments (author, time, resolved status).
+  A page's comments (author, time, resolved status; `via` "agent" on one an agent wrote). GET /api/v1/comments lists the open ones of every website at once.
 - **write_comment** · POST · scope build · required: page, text  
   Write a comment on a page — it appears under the signed-in person's name.
 - **resolve_comment** · POST · scope build · required: page, comment  
@@ -518,7 +559,7 @@ tools also answer GET. The exact schemas stand in
 - **set_maintenance** · POST · scope operate · required: on · confirm required  
   Pause the website or bring it back. In maintenance mode visitors see the maintenance page (the project's `wartung` page, or a default); the live build stays untouched.
 - **update_settings** · POST · scope build · required: none  
-  Website settings: name (site name), visible (search engines yes/no for the whole website; one page alone: submit_page hidden), title_suffix (append site name to page titles), verification (Google Search Console code), built_with (the line "Built with Cleverpage" at the end of every page of a website at the early access price, from its next publication), icon_set (base icon set), icon_other_sets (may editors pick from other sets). Only the fields you pass change.
+  Website settings: name (site name), visible (search engines yes/no for the whole website; one page alone: submit_page hidden), title_suffix (append site name to page titles), verification (Google Search Console code), built_with (the line "Built with Cleverpage" at the end of every page of a website at the early access price, from its next publication), icon_set (base icon set), icon_other_sets (may editors pick from other sets), llms (llms.txt and a Markdown version of every page for AI assistants: enabled, summary, links, exclude; within it too only what you pass changes). Only the fields you pass change.
 - **read_privacy_facts** · GET or POST · scope read · required: none  
   What the imprint and the privacy notice need from Cleverpage's side, for this website: who runs it and where it is hosted, delivery on the own domain, server logs, cookies, fonts, the visitor count (with its ready German paragraph), the forms and what happens to their entries, video embeds — and the short list of what only the owner can say. Read it before writing either page.
 - **read_page** · GET or POST · scope read · required: name  
